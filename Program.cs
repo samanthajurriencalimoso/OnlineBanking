@@ -1,33 +1,65 @@
 ﻿using System;
+using OnlineBankingAppService;
+using OnlineBankingModels;
 
 namespace OnlineBanking_Act1
 {
     internal class Program
     {
-        static double deposit = 0.0, balance = 0.0, withdraw = 0.0;
-        static string OptionCon = "";
-        static int correctPin = 0000, Fee = 15, ServiceFee;
         static void Main(string[] args)
         {
+
             Console.WriteLine("ONLINE BANKING");
 
-            for (int i = 0; i < 3; i++)
-            {
-                Console.Write("Good day! \n" +
-                              "ENTER 4-DIGIT CODE: ");
-                int UserPin = Convert.ToInt32(Console.ReadLine());
+            OnlineBankAppService appService = new OnlineBankAppService();
+            bool isContinue = true;
 
-                if (UserPin == correctPin)
+            Console.Write("ENTER ACCOUNT NUMBER: ");
+            int UserAccountNum = Convert.ToInt32(Console.ReadLine());
+
+            do
+            {
+
+                bool authenticated = false;
+
+                for (int i = 0; i < 3; i++)
                 {
-                    Choices(); break;
+                    Console.Write("ENTER 4-DIGIT CODE: ");
+                    int UserPin = Convert.ToInt32(Console.ReadLine());
+
+                    authenticated = appService.Authenticate(UserAccountNum, UserPin);
+
+                    if (authenticated)
+                    {
+                        Console.WriteLine("Login Successful!");
+                        Choices(appService, UserAccountNum); break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("You only have " + (2 - i) + " tries left. Incorrect MPIN entered.");
+                    }
+                }
+
+                Console.Write("Do you want to continue? [Y/N]: ");
+                string continueInput = Console.ReadLine();
+
+                if (continueInput.ToUpper() == "Y")
+                {
+                    isContinue = true;
+                }
+                else if (continueInput.ToUpper() == "N")
+                {
+                    Console.WriteLine("Thank you for using our service. Have a nice day!");
+                    Environment.Exit(0);
                 }
                 else
                 {
-                    Console.WriteLine("You only have " + (2 - i) + " tries left. Incorrect MPIN entered.");
+                    Console.WriteLine("Invalid input. System will exit.");
+                    Environment.Exit(0);
                 }
-            }
+            } while (isContinue);
 
-            static void Choices()
+            static void Choices(OnlineBankAppService appService, int accountNumber)
             {
                 Console.WriteLine("Welcome! What do you want to do today? \n" +
                               "1. BALANCE \n" +
@@ -41,122 +73,30 @@ namespace OnlineBanking_Act1
                 switch (MenuInput)
                 {
                     case 1:
-                        Balance(); //RETRIEVE
+                        Console.WriteLine("Your Balance is: PHP " + appService.GetBalance(accountNumber)); //RETRIEVE
                         break;
-                    case 2: //UPDATE
-                        Deposit(); // CASH-IN
+                    case 2: // CASH-IN
+                        Console.Write("\n DEPOSIT CHOICES: \n" +
+                                      "1. BANK CASH-IN [BCI]\n" +
+                                      "2. OVER-THE-COUNTER CASH-IN [OTC]\n" +
+                                      "PLEASE SELECT AN OPTION [BCI|OTC]: ");
+                        string DepositInput = Console.ReadLine().ToUpper();
+
+                        Console.Write("ENTER THE AMOUNT TO DEPOSIT: PHP");
+                        double deposit = Convert.ToDouble(Console.ReadLine());
+
+                        appService.Deposit(accountNumber, DepositInput, deposit);
+
                         break;
-                    case 3: //UPDATE
-                        Withdraw(); // CASH-OUT
-                        break;
-                    default:
-                        Console.WriteLine("Invalid input. System will exit.");
-                        break;
+                        //case 3: //UPDATE
+                        //    appService.Withdraw(accountNumber); // CASH-OUT
+                        //    break;
+                        //default:
+                        //    Console.WriteLine("Invalid input. System will exit.");
+                        //    break;
                 }
-            }
-
-
-            static void Balance()
-            {
-                Console.WriteLine("CURRENT BALANCE IS PHP" + balance);
-            }
-
-            static void Deposit() // CASH-IN
-            {
-                Console.Write("\n DEPOSIT CHOICES: \n" +
-                              "1. BANK CASH-IN \n" +
-                              "2. OVER-THE-COUNTER CASH-IN\n" +
-                              "PLEASE SELECT AN OPTION: ");
-                int DepositInput = Convert.ToInt32(Console.ReadLine());
-
-                switch (DepositInput)
-                {
-                    case 1:
-                        Console.Write("ENTER BANK CASH-IN [BPI|BDO|LANDBANK]: ");
-                        string Bank = Console.ReadLine();
-
-                        string BankInput = Bank.ToUpper();
-
-                        if (BankInput == "BPI" || BankInput == "BDO" || BankInput == "LANDBANK")
-                        {   
-                            Console.Write("ENTER THE AMOUNT TO DEPOSIT: PHP");
-                            deposit = Convert.ToDouble(Console.ReadLine());
-
-                            balance = balance + (deposit - Fee);
-
-                            Console.WriteLine("THE AMOUNT DEPOSITED WITH THE BANK FEE IS: PHP" + deposit +
-                                              ". UPDATED BALANCE PHP" + balance);
-
-                        } break;
-                    case 2:
-                        Console.Write("ENTER BANK CASH-IN [7-ELEVEN|ROBINSONS|HANDYMAN]: ");
-                        Bank = Console.ReadLine();
-
-                        BankInput = Bank.ToUpper();
-
-                        if (BankInput == "ROBINSONS" || BankInput == "HANDYMAN")
-                        {
-                            Console.Write("ENTER THE AMOUNT TO DEPOSIT: PHP");
-                            deposit = Convert.ToDouble(Console.ReadLine());
-
-                            balance = balance + (deposit - Fee);
-
-                            Console.WriteLine("THE AMOUNT DEPOSITED WITH THE BANK FEE IS: PHP" + deposit +
-                                              ". UPDATED BALANCE PHP" + balance);
-                        }
-                        else if (BankInput == "7-ELEVEN")
-                        {
-                            Console.Write("ENTER THE AMOUNT TO DEPOSIT: PHP");
-                            deposit = Convert.ToDouble(Console.ReadLine());
-
-                            balance = balance + (deposit - ServiceFee);
-
-                            Console.WriteLine("THE AMOUNT DEPOSITED WITH THE BANK FEE IS: PHP" + deposit +
-                                              ". UPDATED BALANCE PHP" + balance);
-                        } break;
-                    default:
-                        Console.WriteLine("WE REGRET TO INFORM YOU THAT BANK IS NOT INCLUDED. WE WILL REVISIT THIS FEATURE LATER."); break;
-                }
-            }
-
-            static void Withdraw() //CASH-OUT
-            {
-                Console.Write("WITHDRAW CHOICES: \n" +
-                              "1. WITHDRAWAL \n" +
-                              "2. BANK TRANSFER \n" +
-                              "PLEASE SELECT AN OPTION: ");
-                int WithdrawInput = Convert.ToInt32(Console.ReadLine());
-
-                if (WithdrawInput == 1)
-                {
-                    Console.Write("ENTER THE AMOUNT TO WITHDRAW: PHP");
-                    withdraw = Convert.ToDouble(Console.ReadLine());
-                    balance = balance - withdraw;
-                }
-
-                else if (WithdrawInput == 2)
-                {
-                    Console.Write("ENTER THE AMOUNT TO DEPOSIT: PHP");
-                    withdraw = Convert.ToDouble(Console.ReadLine());
-                    /* Insert transfer FEE to bank account 
-                     * BPI | BDO | METROBANK | ETC
-                     * SECURITY BANK | UNION BANK | PNB 
-                     * CHINA BANK | RCBC | ETC
-
-                       balance = balance - withdraw; */
-                }
-
-                else
-                {
-                    Console.WriteLine("Invalid input. System will exit.");
-                    Environment.Exit(0);
-                }
-
-
-
-                //Console.WriteLine("UPDATE TRANSACTION HISTORY: PHP" + amount +
-                //          ". UPDATED BALANCE PHP" + balance);
             }
         }
+
     }
 }
