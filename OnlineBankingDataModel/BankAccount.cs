@@ -1,7 +1,9 @@
 ﻿namespace OnlineBankingDataModel
 {
-    public class Class1
+    public class BankAccount
     {
-
+        public int AccountNumber { get; set; }
+        public int Pincode { get; set; }
+        public double balance { get; set; }
     }
 }

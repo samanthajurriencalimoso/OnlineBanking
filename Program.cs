@@ -1,6 +1,6 @@
 ﻿using System;
 using OnlineBankingAppService;
-using OnlineBankingModels;
+using OnlineBankingDataModel;
 
 namespace OnlineBanking_Act1
 {
@@ -31,7 +31,7 @@ namespace OnlineBanking_Act1
 
                     if (authenticated)
                     {
-                        Console.WriteLine("Login Successful!");
+                        Console.WriteLine("\nLogin Successful!");
                         Choices(appService, UserAccountNum); break;
                     }
                     else

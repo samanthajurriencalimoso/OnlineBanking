@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OnlineBankingDataModel\OnlineBankingDataModel.csproj" />
+    <ProjectReference Include="..\OnlineBankingDataService\OnlineBankingDataService.csproj" />
+  </ItemGroup>
+
 </Project>
