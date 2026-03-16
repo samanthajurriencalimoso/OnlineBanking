@@ -80,20 +80,31 @@ namespace OnlineBanking_Act1
                                       "1. BANK CASH-IN [BCI]\n" +
                                       "2. OVER-THE-COUNTER CASH-IN [OTC]\n" +
                                       "PLEASE SELECT AN OPTION [BCI|OTC]: ");
-                        string DepositInput = Console.ReadLine().ToUpper();
+                        string SectionInput = Console.ReadLine().ToUpper();
 
                         Console.Write("ENTER THE AMOUNT TO DEPOSIT: PHP");
                         double deposit = Convert.ToDouble(Console.ReadLine());
 
-                        appService.Deposit(accountNumber, DepositInput, deposit);
+                        Console.WriteLine(appService.Deposit(accountNumber, SectionInput, deposit));
 
                         break;
-                        //case 3: //UPDATE
-                        //    appService.Withdraw(accountNumber); // CASH-OUT
-                        //    break;
-                        //default:
-                        //    Console.WriteLine("Invalid input. System will exit.");
-                        //    break;
+                    case 3: // CASH-IN
+                        Console.Write("\n WITHDRAW CHOICES: \n" +
+                                      "1. BANK TRANSFER [BT]\n" +
+                                      "2. OVER-THE-COUNTER CASH-OUT [OTC]\n" +
+                                      "3. PARTNER OUTLET CASH-OUT [PO]\n" +
+                                      "PLEASE SELECT AN OPTION [BCI|OTC|PO]: ");
+                        string SectionInput2 = Console.ReadLine().ToUpper();
+
+                        Console.Write("ENTER THE AMOUNT TO DEPOSIT: PHP");
+                        double withdraw = Convert.ToDouble(Console.ReadLine());
+
+                        Console.WriteLine(appService.Withdraw(accountNumber, SectionInput2, withdraw));
+
+                        break;
+                    default:
+                        Console.WriteLine("Invalid input. System will exit.");
+                        break;
                 }
             }
         }
