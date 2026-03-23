@@ -6,12 +6,16 @@ namespace OnlineBanking_Act1
 {
     internal class Program
     {
+        static OnlineBankAppService appService = new OnlineBankAppService();
+        static int UserAccountNum;
         static void Main(string[] args)
         {
-
             Console.WriteLine("ONLINE BANKING");
+            Start();
+        }
 
-            OnlineBankAppService appService = new OnlineBankAppService();
+        static void Start()
+        {
             bool isContinue = true;
 
             Console.Write("ENTER ACCOUNT NUMBER: ");
@@ -32,7 +36,7 @@ namespace OnlineBanking_Act1
                     if (authenticated)
                     {
                         Console.WriteLine("\nLogin Successful!");
-                        Choices(appService, UserAccountNum); break;
+                        Choices(UserAccountNum); break;
                     }
                     else
                     {
@@ -58,8 +62,8 @@ namespace OnlineBanking_Act1
                     Environment.Exit(0);
                 }
             } while (isContinue);
-
-            static void Choices(OnlineBankAppService appService, int accountNumber)
+        }
+            static void Choices(int accountNumber)
             {
                 Console.WriteLine("Welcome! What do you want to do today? \n" +
                               "1. BALANCE \n" +
@@ -72,8 +76,8 @@ namespace OnlineBanking_Act1
 
                 switch (MenuInput)
                 {
-                    case 1:
-                        Console.WriteLine("Your Balance is: PHP " + appService.GetBalance(accountNumber)); //RETRIEVE
+                    case 1: //RETRIEVE
+                    Console.WriteLine("Your Balance is: PHP " + appService.GetBalance(accountNumber)); 
                         break;
                     case 2: // CASH-IN
                         Console.Write("\n DEPOSIT CHOICES: \n" +
@@ -82,12 +86,47 @@ namespace OnlineBanking_Act1
                                       "PLEASE SELECT AN OPTION [BCI|OTC]: ");
                         string SectionInput = Console.ReadLine().ToUpper();
 
-                        Console.Write("ENTER THE AMOUNT TO DEPOSIT: PHP");
-                        double deposit = Convert.ToDouble(Console.ReadLine());
+                        string BankInput = "";
 
-                        Console.WriteLine(appService.Deposit(accountNumber, SectionInput, deposit));
+                    switch (SectionInput)
+                    {
+                        case "BCI":
+                            Console.Write("\nBANK CASH-IN OPTIONS: \n" +
+                                              "1. BPI \n" +
+                                              "2. BDO \n" +
+                                              "3. LANDBANK \n" +
+                                              "ENTER BANK CASH-IN [BCI] BANK: ");
+                            BankInput = Console.ReadLine().ToUpper();
+                            break;
+                        case "OTC":
+                            Console.Write("\nBANK OVER-THE-COUNTER OPTIONS: \n" +
+                                              "1. ROBINSONS \n" +
+                                              "2. HANDYMAN \n" +
+                                              "3. 7-ELEVEN \n" +
+                                              "ENTER OVER-THE-COUNTER CASH-IN [OTC] BANK: ");
+                            BankInput = Console.ReadLine().ToUpper();
+                            break;
+                        case "PO":
+                            Console.Write("\nPARTNER OUTLET OPTIONS: \n" +
+                                              "1. 7-ELEVEN \n" +
+                                              "2. SM \n" +
+                                              "3. PUREGOLD \n" +
+                                              "ENTER PARTNER OUTLET CASH-OUT: ");
+                            BankInput = Console.ReadLine().ToUpper();
+                            break;
 
-                        break;
+                        default:
+                            Console.WriteLine("Invalid deposit option.");
+                            return;
+                    }
+
+                    Console.Write("ENTER THE AMOUNT TO DEPOSIT: PHP ");
+                    double amount = Convert.ToDouble(Console.ReadLine());
+
+                    string result = appService.Deposit(accountNumber, SectionInput, BankInput, amount);
+                    Console.WriteLine(result);
+                    break;
+
                     case 3: // CASH-IN
                         Console.Write("\n WITHDRAW CHOICES: \n" +
                                       "1. BANK TRANSFER [BT]\n" +
@@ -96,18 +135,52 @@ namespace OnlineBanking_Act1
                                       "PLEASE SELECT AN OPTION [BCI|OTC|PO]: ");
                         string SectionInput2 = Console.ReadLine().ToUpper();
 
-                        Console.Write("ENTER THE AMOUNT TO DEPOSIT: PHP");
-                        double withdraw = Convert.ToDouble(Console.ReadLine());
+                        string BankInput2 = "";
 
-                        Console.WriteLine(appService.Withdraw(accountNumber, SectionInput2, withdraw));
+                    switch (SectionInput2)
+                    {
+                        case "BT":
+                            Console.Write("\nBANK TRANSFER OPTIONS: \n" +
+                                              "1. BPI \n" +
+                                              "2. BDO \n" +
+                                              "3. LANDBANK \n" +
+                                              "ENTER BANK TRANSFER [BT]: ");
+                            BankInput2 = Console.ReadLine().ToUpper();
+                            break;
 
-                        break;
-                    default:
-                        Console.WriteLine("Invalid input. System will exit.");
-                        break;
-                }
+                        case "OTC":
+                            Console.Write("\nOVER-THE-COUNTER CASH-OUT OPTIONS: \n" +
+                                              "1. PALAWAN \n" +
+                                              "2. CEBUANA \n" +
+                                              "3. VILLARICA \n" +
+                                              "ENTER OVER-THE-COUNTER CASH-IN [OTC] BANK: ");
+                            BankInput2 = Console.ReadLine().ToUpper();
+                            break;
+
+                        case "PO":
+                            Console.Write("\nPARTNER OUTLET CASH-OUT OPTIONS: \n" +
+                                              "1. 7-ELEVEN \n" +
+                                              "2. SM \n" +
+                                              "3. PUREGOLD \n" +
+                                              "ENTER PARTNER-OUTLET CASH-IN [PO]: ");
+                            BankInput2 = Console.ReadLine().ToUpper();
+                            break;
+
+                        default:
+                            Console.WriteLine("Invalid withdraw option.");
+                            return;
+                    }
+
+                    Console.Write("ENTER THE AMOUNT TO DEPOSIT: PHP");
+                        double Wamount = Convert.ToDouble(Console.ReadLine());
+
+                    string withdrawResult = appService.Withdraw(accountNumber, SectionInput2, BankInput2, Wamount);
+                    Console.WriteLine(withdrawResult);
+                    break;
+
             }
         }
-
     }
+
 }
+

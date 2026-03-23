@@ -9,13 +9,6 @@ namespace OnlineBankingAppService
     {
         OnlineBankDataService dataService = new OnlineBankDataService();
 
-       
-        //static double Fee = 0.0;
-        //static double balance = 0.0;
-        //static double deposit = 0.0;
-        //static double withdraw = 0.0;
-        //static double amount = 0.0;
-
         public bool Authenticate(int accountNumber, int pincode)
         {
             var account = dataService.GetAccNum(accountNumber);
@@ -36,15 +29,11 @@ namespace OnlineBankingAppService
 
             double Fee = 0.0;
 
+            if (amount <= 0) return "Invalid deposit amount.";
+
             switch (SectionInput)
             {
                 case "BCI":
-                    Console.WriteLine("BANK CASH-IN OPTIONS: \n" +
-                                      "1. BPI \n" +
-                                      "2. BDO \n" +
-                                      "3. LANDBANK \n" +
-                                      "ENTER BANK CASH-IN [BCI] BANK: ");
-                    string BankInput = Console.ReadLine().ToUpper();
                     switch (BankInput)
                     {
                         case "BPI":
@@ -52,14 +41,11 @@ namespace OnlineBankingAppService
                         case "LANDBANK":
                             Fee = 15.00;
                             break;
-                    } break;
+                        default:
+                            return "Invalid bank for Bank Cash-In.";
+                    }
+                    break;
                 case "OTC":
-                    Console.WriteLine("BANK OVER-THE-COUNTER OPTIONS: \n" +
-                                      "1. ROBINSONS \n" + 
-                                      "2. HANDYMAN \n" +
-                                      "3. 7-ELEVEN \n" +
-                                      "ENTER OVER-THE-COUNTER CASH-IN [OTC] BANK: ");
-                    BankInput = Console.ReadLine().ToUpper();
                     switch (BankInput)
                     {
                         case "ROBINSONS":
@@ -69,55 +55,50 @@ namespace OnlineBankingAppService
                         case "7-ELEVEN":
                             Fee = 0.02;
                             break;
-                    } break;
+                        default:
+                            return "Invalid bank/provider for Over-the-counter options.";
+                    }
+                    break;
                 case "PO":
-                    Console.WriteLine("PARTNER OUTLET OPTIONS: \n" +
-                                      "1. SM  \n" +
-                                      "2. PUREGOLD \n" +
-                                      "3. PALAWAN PAWNSHOP \n" +
-                                      "ENTER PARTNER OUTLET CASH-OUT: ");
-                    BankInput = Console.ReadLine().ToUpper().Trim();
-                    switch (BankInput)
-                    {
+                    switch (BankInput) {
+                        case "7-ELEVEN":
+                            Fee = 0.02;
+                            break;
                         case "SM":
                         case "PUREGOLD":
-                        case "PALAWAN":
                             Fee = 10.00;
                             break;
-                    }
-                            break;
+                        default:
+                            return "Invalid provider for Pay-Online options.";
+                    } break;
                 default:
-                    Console.WriteLine("WE REGRET TO INFORM YOU THAT BANK IS NOT INCLUDED. WE WILL REVISIT THIS FEATURE LATER."); return;
-            }
-
-            account.balance += amount - Fee;
-            BankAccount accountUpdate = new BankAccount();
-
-            dataService.Update(account);
-
-            Console.WriteLine("THE AMOUNT DEPOSITED WITH THE BANK FEE IS: PHP" + account.balance);
+                    return "Invalid deposit section.";
         }
 
-        public void Withdraw(int accountNumber, string SectionInput2, double amount) // CASH-IN
+            account.balance += amount - Fee;
+            dataService.Update(account);
+
+            return $"Deposit successful. Fee: PHP {Fee}. New balance: PHP {account.balance}";
+        }
+
+        public string Withdraw(int accountNumber, string SectionInput, string BankInput, double amount) // CASH-IN
         {
             var account = dataService.GetAccNum(accountNumber);
             if (account == null)
             {
-                Console.WriteLine("Account not found.");
-                return;
+                return "Account not found.";
             }
 
             double Fee = 0.0;
 
-            switch (SectionInput2)
+           if (amount <= 0)
+            {
+                return "Invalid withdrawal amount.";
+            }
+
+            switch (SectionInput)
             {
                 case "BT":
-                    Console.WriteLine("BANK TRANSFER OPTIONS: \n" +
-                                      "1. BPI \n" +
-                                      "2. BDO \n" +
-                                      "3. LANDBANK \n" +
-                                      "ENTER BANK TRANSFER [BT] BANK: ");
-                    string BankInput = Console.ReadLine().ToUpper();
                     switch (BankInput)
                     {
                         case "BPI":
@@ -125,15 +106,12 @@ namespace OnlineBankingAppService
                         case "LANDBANK":
                             Fee = 20.00;
                             break;
+                        default:
+                            return "Invalid bank for BT.";
                     }
                     break;
+
                 case "OTC":
-                    Console.WriteLine("OVER-THE-COUNTER CASH-OUT OPTIONS: \n" +
-                                      "1. PALAWAN \n" +
-                                      "2. CEBUANA \n" +
-                                      "3. VILLARICA \n" +
-                                      "ENTER OTC CASH-OUT: ");
-                    BankInput = Console.ReadLine().ToUpper();
                     switch (BankInput)
                     {
                         case "PALAWAN":
@@ -141,19 +119,11 @@ namespace OnlineBankingAppService
                         case "VILLARICA":
                             Fee = 15.00;
                             break;
-                        case "7-ELEVEN":
-                            Fee = 0.02;
-                            break;
+                        default:
+                            return "Invalid provider for OTC.";
                     }
                     break;
-
                 case "PO":
-                    Console.WriteLine("PARTNER OUTLET OPTIONS: \n" +
-                                      "1. 7-ELEVEN \n" +
-                                      "2. SM \n" +
-                                      "3. PUREGOLD \n" +
-                                      "ENTER PARTNER OUTLET CASH-OUT: ");
-                    BankInput = Console.ReadLine().ToUpper();
                     switch (BankInput)
                     {
                         case "7-ELEVEN":
@@ -163,27 +133,21 @@ namespace OnlineBankingAppService
                         case "PUREGOLD":
                             Fee = 10.00;
                             break;
+                        default:
+                            return "Invalid provider for PO.";
                     }
                     break;
-                default:
-                    Console.WriteLine("WE REGRET TO INFORM YOU THAT BANK IS NOT INCLUDED. WE WILL REVISIT THIS FEATURE LATER."); return;
-            }
-            account.balance -= amount + Fee;
-            BankAccount accountUpdate = new BankAccount();
 
+                default:
+                    return "Invalid withdrawal section.";
+            }
+            if (account.balance < amount + Fee)
+                return "Insufficient balance.";
+
+            account.balance -= amount + Fee;
             dataService.Update(account);
 
-            Console.WriteLine("THE AMOUNT DEPOSITED WITH THE BANK FEE IS: PHP" + account.balance);
+            return $"Withdrawal successful. Fee: PHP {Fee}. New balance: PHP {account.balance}";
         }
-
-        //public void Withdraw(int accountNumber, object withdrawAmount)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public void Deposit(int accountNumber, object damount)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }
