@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace OnlineBankingDataService
 {
-    public class OnlineBankingDataService
+    public class BankingDataService
     {
         IOnlineBankingDataService _dataService;
-        public OnlineBankingDataService(IOnlineBankingDataService dataService)
+        public BankingDataService(IOnlineBankingDataService dataService)
         {
             _dataService = dataService;
         }
