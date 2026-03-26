@@ -1,41 +1,32 @@
-﻿using System;
-using OnlineBankingDataModel;
+﻿using OnlineBankingDataModel;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
 namespace OnlineBankingDataService
 {
-    public class OnlineBankDataService
+    public class OnlineBankingDataService
     {
-        public List<BankAccount> Accounts = new List<BankAccount>();
-
-        public OnlineBankDataService()
+        IOnlineBankingDataService _dataService;
+        public OnlineBankingDataService(IOnlineBankingDataService dataService)
         {
-            BankAccount AccNum1 = new BankAccount { AccountNumber = 0000, Pincode = 1111, balance = 0.0 };
-            BankAccount AccNum2 = new BankAccount { AccountNumber = 1001, Pincode = 1111, balance = 0.0 };
-            BankAccount AccNum3 = new BankAccount { AccountNumber = 1002, Pincode = 2222, balance = 0.0 };
-
-            Accounts.Add(AccNum1);
-            Accounts.Add(AccNum2);
-            Accounts.Add(AccNum3);
-
+            _dataService = dataService;
         }
 
         public BankAccount? GetAccNum(int accountNumber)
         {
-            return Accounts.FirstOrDefault(a => a.AccountNumber == accountNumber);
+            return _dataService.GetAccNum(accountNumber);
         }
 
         public void Add(BankAccount account)
         {
-            Accounts.Add(account);
+            _dataService.Add(account);
         }
         public void Update(BankAccount account)
         {
-            var existingAccount = GetAccNum(account.AccountNumber);
-            if (existingAccount != null)
-            {
-                existingAccount.Pincode = account.Pincode;
-                existingAccount.balance = account.balance;
-            }
+            _dataService.Update(account);
         }
-
     }
 }

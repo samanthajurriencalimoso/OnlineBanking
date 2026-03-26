@@ -7,7 +7,7 @@ namespace OnlineBankingAppService
 {
     public class OnlineBankAppService
     {
-        OnlineBankDataService dataService = new OnlineBankDataService();
+        IOnlineBankingDataService dataService = new OnlineBankingDBData();
 
         public bool Authenticate(int accountNumber, int pincode)
         {
