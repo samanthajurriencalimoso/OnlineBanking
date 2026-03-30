@@ -16,34 +16,28 @@ namespace OnlineBankingAppService
 
         }
 
-        public string CreateAccount(int age, string pin, string securityCode)
+        public string CreateAccount(int age, int pin, int securityCode)
         {
 
-            if (string.IsNullOrWhiteSpace(pin) || pin.Length != 4 || !int.TryParse(pin, out _))
-            {
-                return "PIN MUST BE 4-DIGITS.";
-            }
             if (pin != securityCode)
             {
-                return "SECURITY CODE DOES NOT MATCH PIN.";
+                return "SECURITY CODE DOES NOT MATCH THE PIN.";
             }
-
-            int pinCodeInt = Convert.ToInt32(pin);
 
             int newAccNo = dataService.GenerateNewAccountNumber();
             var newAccount = new BankAccount 
             { 
                 AccountNumber = newAccNo, 
-                Pincode = pinCodeInt,
+                Pincode = pin,
                 balance = 0 
-            };
+        };
 
             dataService.Add(newAccount);
 
-           return $" YOUR ACCOUNT HAS BEEN REGISTERED SUCCESSFULLY!\n" +
-           $"YOUR ACCOUNT NUMBER IS: {newAccNo}\n" +
-           $"INITIAL BALANCE: PHP {newAccount.balance}\n" +
-           $"PLEASE KEEP YOUR PIN SECURE.";
+           return $"YOUR ACCOUNT HAS BEEN REGISTERED SUCCESSFULLY!\n" +
+                  $"YOUR ACCOUNT NUMBER IS: {newAccNo}\n" +
+                  $"INITIAL BALANCE: PHP {newAccount.balance}\n" +
+                  $"PLEASE KEEP YOUR PIN SECURE.";
         }
 
         public double GetBalance(int accountNumber)

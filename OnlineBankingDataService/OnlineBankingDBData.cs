@@ -34,16 +34,6 @@ namespace OnlineBankingDataService
             }
         }
 
-        public int GenerateNewAccountNumber()
-        {
-            string query = "SELECT MAX(AccountNumber) FROM BankAccounts";
-            SqlCommand cmd = new SqlCommand(query, sqlConnection);
-            sqlConnection.Open();
-            object result = cmd.ExecuteScalar();
-            sqlConnection.Close();
-            int maxAccountNumber = (result != DBNull.Value) ? Convert.ToInt32(result) : 0;
-            return maxAccountNumber + 1;
-        }
 
         public void Add(BankAccount account)
         {
@@ -112,16 +102,18 @@ namespace OnlineBankingDataService
             return account;
         }
 
-        public int GenerateNewAccountNumber(BankAccount account)
+        public int GenerateNewAccountNumber()
         {
             string query = "SELECT ISNULL(MAX(AccountNumber), 999) FROM BankAccounts";
-            SqlCommand command = new SqlCommand(query, sqlConnection);
+            using (SqlCommand command = new SqlCommand(query, sqlConnection))
+            {
+                sqlConnection.Open();
+                object result = command.ExecuteScalar();
+                sqlConnection.Close();
 
-            sqlConnection.Open();
-            int maxAccNo = (int)command.ExecuteScalar();
-            sqlConnection.Close();
-
-            return maxAccNo + 1;
+                int maxAccNo = (result == DBNull.Value) ? 999 : Convert.ToInt32(result);
+                return maxAccNo + 1; 
+            }
         }
 
         public void Update(BankAccount account)

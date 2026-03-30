@@ -41,13 +41,13 @@ namespace OnlineBanking_Act1
 
         static void Register()
         {
-            string result;
             bool success = false;
 
             do
             {
                 Console.Write("-------------------------\n");
-                Console.Write("AGE VALIDATION: \n" +
+                Console.Write("ACCOUNT REGISTRATION\n" +
+                              "AGE VALIDATION: \n" +
                               "ENTER YOUR AGE: ");
                 int age = Convert.ToInt32(Console.ReadLine());
 
@@ -56,29 +56,65 @@ namespace OnlineBanking_Act1
                     Console.Write("SORRY, YOU MUST BE AT LEAST 18 YEARS OLD TO CREATE AN ACCOUNT.");
                     return;
                 }
-
-                Console.Write("ENTER A 4-DIGIT PIN: ");
-                string pinCode = Console.ReadLine();
-
-                if (pinCode.Length != 4 && int.TryParse(pinCode, out _))
+                else
                 {
-                    Console.WriteLine("INVALID PIN. PLEASE ENTER A 4-DIGIT PIN.");
-                    return;
+
+                    Console.Write("ENTER A 4-DIGIT PIN: ");
+                    string pinCode = Console.ReadLine();
+
+                    if (pinCode.Length != 4 || !int.TryParse(pinCode, out int pinInt))
+                    {
+                        Console.WriteLine("INVALID PIN. PLEASE ENTER A 4-DIGIT PIN.");
+                        return;
+                    }
+                    else
+                    {
+
+                        Console.Write("CONFIRM YOUR 4-DIGIT PIN: ");
+                        string securityCode = Console.ReadLine();
+
+                        if (securityCode.Length != 4 || !int.TryParse(securityCode, out int ConfirmPin))
+                        {
+                            Console.WriteLine("INVALID CONFIRMATION PIN.");
+                            return;
+                        }
+                        else if (pinInt != ConfirmPin)
+                        {
+                            Console.WriteLine("SECURITY CODE DOES NOT MATCH THE PIN.");
+                        }
+                        else
+                        {
+
+                            string result = appService.CreateAccount(age, pinInt, ConfirmPin);
+                            Console.WriteLine(result);
+
+                            if (result.Contains("REGISTERED SUCCESSFULLY."))
+                            {
+                                success = true;
+                                LOGIN();
+                            }
+                        }
+                    }
                 }
 
-                Console.Write("CONFIRM YOUR 4-DIGIT PIN: ");
-                string securityCode = Console.ReadLine();
-
-                result = appService.CreateAccount(age, pinCode, securityCode);
-                Console.WriteLine(result);
-
-
-                if (result.StartsWith("Apologizes") && !result.Contains("INVALID.") && !result.Contains("DOES NOT MATCH."))
+                if (!success)
                 {
-                    success = true;
+                    Console.WriteLine("-------------------------");
+                    Console.Write("DO YOU WANT TO REGISTER AGAIN? [Y|N]: ");
+                    string retry = Console.ReadLine().ToUpper();
+
+                    if (retry == "Y")
+                    {
+                        success = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("RETURNING TO THE MAIN MENU...");
+                        return;
+                    }
                 }
 
-            } while (!success);
+                } while (!success);
 
             Console.WriteLine("YOU MAY NOW LOG IN TO START THE TRANSACTIONS.");
             LOGIN();
@@ -151,7 +187,7 @@ namespace OnlineBanking_Act1
             switch (MenuInput)
             {
                 case 1: //RETRIEVE
-                    Console.Write("-------------------------");
+                    Console.WriteLine("-------------------------");
                     Console.WriteLine("Your Balance is: PHP " + appService.GetBalance(accountNumber));
                     break;
                 case 2: // CASH-IN
@@ -167,7 +203,7 @@ namespace OnlineBanking_Act1
                     switch (SectionInput)
                     {
                         case "BCI":
-                            Console.Write("-------------------------");
+                            Console.WriteLine("-------------------------");
                             Console.Write("\nBANK CASH-IN OPTIONS: \n" +
                                               "1. BPI \n" +
                                               "2. BDO \n" +
@@ -176,7 +212,7 @@ namespace OnlineBanking_Act1
                             BankInput = Console.ReadLine().ToUpper();
                             break;
                         case "OTC":
-                            Console.Write("-------------------------");
+                            Console.WriteLine("-------------------------");
                             Console.Write("\nBANK OVER-THE-COUNTER OPTIONS: \n" +
                                               "1. ROBINSONS \n" +
                                               "2. HANDYMAN \n" +
@@ -185,7 +221,7 @@ namespace OnlineBanking_Act1
                             BankInput = Console.ReadLine().ToUpper();
                             break;
                         case "PO":
-                            Console.Write("-------------------------");
+                            Console.WriteLine("-------------------------");
                             Console.Write("\nPARTNER OUTLET OPTIONS: \n" +
                                               "1. 7-ELEVEN \n" +
                                               "2. SM \n" +
@@ -199,7 +235,7 @@ namespace OnlineBanking_Act1
                             return;
                     }
 
-                    Console.Write("-------------------------");
+                    Console.WriteLine("-------------------------");
                     Console.Write("ENTER THE AMOUNT TO DEPOSIT: PHP ");
                     double amount = Convert.ToDouble(Console.ReadLine());
 
@@ -208,7 +244,7 @@ namespace OnlineBanking_Act1
                     break;
 
                 case 3: // CASH-OUT
-                    Console.Write("-------------------------");
+                    Console.WriteLine("-------------------------");
                     Console.Write("\n WITHDRAW CHOICES: \n" +
                                   "1. SEND MONEY [SM] \n" +
                                   "2. BANK TRANSFER [BT]\n" +
@@ -222,7 +258,7 @@ namespace OnlineBanking_Act1
                     switch (SectionInput2)
                     {
                         case "SM":
-                            Console.Write("-------------------------");
+                            Console.WriteLine("-------------------------");
                             Console.Write("\n SEND MONEY (INTERNAL TRANSFER) \n");
                             Console.Write("ENTER RECEIVER ACCOUNT NUMBER [EX. 1000]: ");
                             BankInput2 = Console.ReadLine();
@@ -239,7 +275,7 @@ namespace OnlineBanking_Act1
                             break;
 
                         case "OTC":
-                            Console.Write("-------------------------");
+                            Console.WriteLine("-------------------------");
                             Console.Write("\nOVER-THE-COUNTER CASH-OUT OPTIONS: \n" +
                                           "1. PALAWAN \n" +
                                           "2. CEBUANA \n" +
@@ -249,7 +285,7 @@ namespace OnlineBanking_Act1
                             break;
 
                         case "PO":
-                            Console.Write("-------------------------");
+                            Console.WriteLine("-------------------------");
                             Console.Write("\nPARTNER OUTLET CASH-OUT OPTIONS: \n" +
                                           "1. 7-ELEVEN \n" +
                                           "2. SM \n" +
@@ -263,7 +299,7 @@ namespace OnlineBanking_Act1
                             return;
                     }
 
-                    Console.Write("-------------------------");
+                    Console.WriteLine("-------------------------");
                     Console.Write("ENTER THE AMOUNT TO WITHDRAW: PHP ");
                     double Wamount = Convert.ToDouble(Console.ReadLine());
 

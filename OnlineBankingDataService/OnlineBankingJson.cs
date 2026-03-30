@@ -83,14 +83,14 @@ namespace OnlineBankingDataService
             }
         }
 
-        public int GenerateNewAccountNumber(BankAccount account)
-        {
-            throw new NotImplementedException();
-        }
-
         public int GenerateNewAccountNumber()
         {
-            throw new NotImplementedException();
+            RetrieveDataFromJsonFile();
+            if (accounts == null || accounts.Count == 0)
+                return 1000;
+
+                int MaxAccNo = accounts.Max(a => a.AccountNumber);
+                return MaxAccNo + 1;
         }
     }
 }

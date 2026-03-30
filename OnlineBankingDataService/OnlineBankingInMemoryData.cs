@@ -5,6 +5,7 @@ namespace OnlineBankingDataService
     public class OnlineBankingInMemoryData : IOnlineBankingDataService
     {
         public List<BankAccount> Accounts = new List<BankAccount>();
+        private object dataService;
 
         public OnlineBankingInMemoryData()
         {
@@ -36,14 +37,16 @@ namespace OnlineBankingDataService
                 existingAccount.balance = account.balance;
             }
         }
-        public int GenerateNewAccountNumber(BankAccount account)
-        {
-            throw new NotImplementedException();
-        }
 
         public int GenerateNewAccountNumber()
         {
-            throw new NotImplementedException();
+            if (Accounts.Count == 0)
+            {
+                return 1000;
+            }
+
+            int maxAccNo = Accounts.Max(a => a.AccountNumber);
+            return maxAccNo + 1;
         }
     }
 }

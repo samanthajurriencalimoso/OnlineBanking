@@ -25,11 +25,6 @@ namespace OnlineBankingDataService
             _dataService.Add(account);
         }
 
-        public int GenerateNewAccountNumber(BankAccount account)
-        {
-            return _dataService.GenerateNewAccountNumber();
-        }
-
         public void Update(BankAccount account)
         {
             _dataService.Update(account);
@@ -37,7 +32,7 @@ namespace OnlineBankingDataService
 
         public int GenerateNewAccountNumber()
         {
-            throw new NotImplementedException();
+            return _dataService.GenerateNewAccountNumber();
         }
     }
 }
