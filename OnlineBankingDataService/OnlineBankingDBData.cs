@@ -37,14 +37,15 @@ namespace OnlineBankingDataService
 
         public void Add(BankAccount account)
         {
-            string insertStatement = @"INSERT INTO BankAccounts (AccountNumber, Pincode, Balance)
-                                       VALUES (@AccountNumber, @Pincode, @Balance)";
+            string insertStatement = @"INSERT INTO BankAccounts (AccountNumber, Pincode, Balance, Transactions)
+                                       VALUES (@AccountNumber, @Pincode, @Balance, @Transactions)";
 
             SqlCommand insertCommand = new SqlCommand(insertStatement, sqlConnection);
 
             insertCommand.Parameters.AddWithValue("@AccountNumber", account.AccountNumber);
             insertCommand.Parameters.AddWithValue("@Pincode", account.Pincode);
             insertCommand.Parameters.AddWithValue("@Balance", account.balance);
+            insertCommand.Parameters.AddWithValue("@Transactions", string.Join(";", account.Transactions));
 
             sqlConnection.Open();
             insertCommand.ExecuteNonQuery();
@@ -53,7 +54,7 @@ namespace OnlineBankingDataService
 
         public List<BankAccount> GetAccounts()
         {
-            string selectStatement = "SELECT AccountNumber, Pincode, Balance FROM BankAccounts";
+            string selectStatement = "SELECT AccountNumber, Pincode, Balance, Transactions FROM BankAccounts";
             SqlCommand selectCommand = new SqlCommand(selectStatement, sqlConnection);
 
             sqlConnection.Open();
@@ -67,7 +68,10 @@ namespace OnlineBankingDataService
                 {
                     AccountNumber = int.Parse(reader["AccountNumber"].ToString()),
                     Pincode = int.Parse(reader["Pincode"].ToString()),
-                    balance = double.Parse(reader["Balance"].ToString())
+                    balance = double.Parse(reader["Balance"].ToString()),
+                    Transactions = reader["Transactions"] == DBNull.Value 
+                    ? new List<string>()
+                    : reader["Transactions"].ToString().Split(';').ToList()
                 };
 
                 accounts.Add(acc);
@@ -79,7 +83,7 @@ namespace OnlineBankingDataService
 
         public BankAccount? GetAccNum(int accountNumber)
         {
-            string query = "SELECT AccountNumber, Pincode, Balance FROM BankAccounts WHERE AccountNumber = @AccountNumber";
+            string query = "SELECT AccountNumber, Pincode, Balance, Transactions FROM BankAccounts WHERE AccountNumber = @AccountNumber";
             SqlCommand cmd = new SqlCommand(query, sqlConnection);
             cmd.Parameters.AddWithValue("@AccountNumber", accountNumber);
 
@@ -94,7 +98,9 @@ namespace OnlineBankingDataService
                 {
                     AccountNumber = int.Parse(reader["AccountNumber"].ToString()),
                     Pincode = int.Parse(reader["Pincode"].ToString()),
-                    balance = double.Parse(reader["Balance"].ToString())
+                    balance = double.Parse(reader["Balance"].ToString()),
+                    Transactions = string.IsNullOrEmpty(reader["Transactions"].ToString())
+                    ? new List<string>() : reader["Transactions"].ToString().Split(';').ToList()
                 };
             }
 
@@ -120,7 +126,8 @@ namespace OnlineBankingDataService
         {
             string updateStmt = @"UPDATE BankAccounts 
                                 SET Pincode = @Pincode,
-                                Balance = @Balance
+                                Balance = @Balance,
+                                Transactions = @Transactions
                                 WHERE AccountNumber = @AccountNumber";
 
             SqlCommand cmd = new SqlCommand(updateStmt, sqlConnection);
@@ -128,6 +135,7 @@ namespace OnlineBankingDataService
             cmd.Parameters.AddWithValue("@AccountNumber", account.AccountNumber);
             cmd.Parameters.AddWithValue("@Pincode", account.Pincode);
             cmd.Parameters.AddWithValue("@Balance", account.balance);
+            cmd.Parameters.AddWithValue("@Transactions", string.Join(";", account.Transactions));
 
             sqlConnection.Open();
             cmd.ExecuteNonQuery();

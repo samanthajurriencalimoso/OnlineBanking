@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using OnlineBankingDataModel;
 using OnlineBankingDataService;
-using OnlineBankingDataModel;
 using System;
+using System.Collections.Generic;
+using System.Security.Principal;
 
 namespace OnlineBankingAppService
 {
@@ -25,19 +26,20 @@ namespace OnlineBankingAppService
             }
 
             int newAccNo = dataService.GenerateNewAccountNumber();
-            var newAccount = new BankAccount 
-            { 
-                AccountNumber = newAccNo, 
+            var newAccount = new BankAccount
+            {
+                AccountNumber = newAccNo,
                 Pincode = pin,
-                balance = 0 
-        };
+                balance = 0
+            };
 
             dataService.Add(newAccount);
 
-           return $"YOUR ACCOUNT HAS BEEN REGISTERED SUCCESSFULLY!\n" +
-                  $"YOUR ACCOUNT NUMBER IS: {newAccNo}\n" +
-                  $"INITIAL BALANCE: PHP {newAccount.balance}\n" +
-                  $"PLEASE KEEP YOUR PIN SECURE.";
+            return "-------------------------------------\n" +
+                   $"YOUR ACCOUNT HAS BEEN REGISTERED SUCCESSFULLY!\n" +
+                   $"YOUR ACCOUNT NUMBER IS: {newAccNo}\n" +
+                   $"INITIAL BALANCE: PHP {newAccount.balance}\n" +
+                   $"PLEASE KEEP YOUR PIN SECURE.";
         }
 
         public double GetBalance(int accountNumber)
@@ -84,7 +86,8 @@ namespace OnlineBankingAppService
                     }
                     break;
                 case "PO":
-                    switch (BankInput) {
+                    switch (BankInput)
+                    {
                         case "7-ELEVEN":
                             Fee = 0.02;
                             break;
@@ -94,13 +97,15 @@ namespace OnlineBankingAppService
                             break;
                         default:
                             return "Invalid provider for Pay-Online options.";
-                    } break;
+                    }
+                    break;
                 default:
                     return "Invalid deposit section.";
-        }
+            }
 
             account.balance += amount - Fee;
             dataService.Update(account);
+            account.Transactions.Add($"DEPOSIT PHP {amount} via {BankInput}");
 
             return $"Deposit successful. Fee: PHP {Fee}. New balance: PHP {account.balance}";
         }
@@ -131,6 +136,7 @@ namespace OnlineBankingAppService
 
             dataService.Update(sender);
             dataService.Update(receiver);
+            sender.Transactions.Add($"SEND MONEY PHP {amount} TO ACCOUNT {receiverAccNo}");
 
             return $"Transfer successful! \n" +
                    $"PHP {amount} has been transferred to account number {receiverAccNo}." +
@@ -147,7 +153,7 @@ namespace OnlineBankingAppService
 
             double Fee = 0.0;
 
-           if (amount <= 0)
+            if (amount <= 0)
             {
                 return "Invalid withdrawal amount.";
             }
@@ -206,8 +212,27 @@ namespace OnlineBankingAppService
 
             account.balance -= amount + Fee;
             dataService.Update(account);
+            account.Transactions.Add($"WITHDRAW PHP {amount} via {BankInput}");
 
             return $"Withdrawal successful. Fee: PHP {Fee}. New balance: PHP {account.balance}";
+        }
+
+        public string PrintReceipt(int accountNumber)
+        {
+            var account = dataService.GetAccNum(accountNumber);
+
+            var receipt = "\n-----------DIGITAL RECEIPT------------\n" +
+                         $"ACCOUNT: {account.AccountNumber}\n" +
+                          "TRANSACTIONS: \n";
+            foreach (var transaction in account.Transactions)
+            {
+                receipt += $"  -  {transaction} \n";
+            }
+
+            receipt +=  $"CURRENT BALANCE: PHP {account.balance}\n" +
+                        $"DATE: {DateTime.Now: dd-MMM-yyyy}\n" +
+                        "-------------------------------------";
+            return receipt;
         }
     }
 }

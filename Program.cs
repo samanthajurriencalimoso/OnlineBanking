@@ -12,32 +12,37 @@ namespace OnlineBanking_Act1
         static void Main(string[] args)
         {
             Console.Write("WELCOME TO ONLINE BANKING \n");
-            Console.Write("-------------------------\n");
-            Console.Write("1. CREATE ACCOUNT \n" +
+            MainMenu();
+        }
+
+            static void MainMenu()
+            {
+                Console.Write("-------------------------\n");
+                Console.Write("1. CREATE ACCOUNT \n" +
                               "2. LOGIN (BALANCE, DEPOSIT, WITHDRAW) \n" +
                               "3. EXIT \n");
-            Console.Write("-------------------------\n");
-            Console.Write("PLEASE SELECT AN OPTION: ");
-            int MenuInput = Convert.ToInt32(Console.ReadLine());
+                Console.Write("-------------------------\n");
+                Console.Write("PLEASE SELECT AN OPTION: ");
+                int MenuInput = Convert.ToInt32(Console.ReadLine());
 
-            switch (MenuInput)
-            {
-                case 1:
-                    Register();
-                    break;
-                case 2:
-                    LOGIN();
-                    break;
-                case 3:
-                    Console.WriteLine("THANK YOU FOR USING ONLINE BANKING!");
-                    Environment.Exit(0);
-                    break;
-                default:
-                    Console.WriteLine("INVALID OPTION. PLEASE TRY AGAIN.");
-                    Environment.Exit(0);
-                    break;
+                switch (MenuInput)
+                {
+                    case 1:
+                        Register();
+                        break;
+                    case 2:
+                        LOGIN();
+                        break;
+                    case 3:
+                        Console.WriteLine("THANK YOU FOR USING ONLINE BANKING!");
+                        Environment.Exit(0);
+                        break;
+                    default:
+                        Console.WriteLine("INVALID OPTION. PLEASE TRY AGAIN.");
+                        Environment.Exit(0);
+                        break;
+                }
             }
-        }
 
         static void Register()
         {
@@ -109,14 +114,17 @@ namespace OnlineBanking_Act1
                     }
                     else
                     {
+                        Console.Write("-------------------------\n");
                         Console.WriteLine("RETURNING TO THE MAIN MENU...");
+                        MainMenu();
                         return;
                     }
                 }
 
                 } while (!success);
 
-            Console.WriteLine("YOU MAY NOW LOG IN TO START THE TRANSACTIONS.");
+            Console.Write("-------------------------\n");
+            Console.Write("YOU MAY NOW LOG IN TO START THE TRANSACTIONS.");
             LOGIN();
         }
 
@@ -162,7 +170,7 @@ namespace OnlineBanking_Act1
                 }
                 else if (continueInput.ToUpper() == "N")
                 {
-                    Console.WriteLine("Thank you for using our service. Have a nice day!");
+                    Console.WriteLine(appService.PrintReceipt(UserAccountNum));
                     Environment.Exit(0);
                 }
                 else
@@ -179,6 +187,7 @@ namespace OnlineBanking_Act1
                           "1. BALANCE \n" +
                           "2. DEPOSIT \n" +
                           "3. WITHDRAW \n" +
+                          "4. EXIT \n" +
                           "OTHER OPTIONS ON THE WAY!");
 
             Console.Write("PLEASE SELECT AN OPTION: ");
@@ -259,7 +268,7 @@ namespace OnlineBanking_Act1
                     {
                         case "SM":
                             Console.WriteLine("-------------------------");
-                            Console.Write("\n SEND MONEY (INTERNAL TRANSFER) \n");
+                            Console.Write("\nSEND MONEY (INTERNAL TRANSFER) \n");
                             Console.Write("ENTER RECEIVER ACCOUNT NUMBER [EX. 1000]: ");
                             BankInput2 = Console.ReadLine();
                             break;
@@ -310,6 +319,16 @@ namespace OnlineBanking_Act1
                     Console.WriteLine(withdrawResult);
                     break;
 
+                case 4: //EXIT
+                    Console.WriteLine(appService.PrintReceipt(accountNumber));
+                    Console.WriteLine("THANK YOU FOR USING ONLINE BANKING!");
+                    Environment.Exit(0);
+                    break;
+
+                default:
+                    Console.WriteLine("INVALID OPTION. PLEASE TRY AGAIN.");
+                    break;
+                
             }
         }
     }

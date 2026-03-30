@@ -5,7 +5,6 @@ namespace OnlineBankingDataService
     public class OnlineBankingInMemoryData : IOnlineBankingDataService
     {
         public List<BankAccount> Accounts = new List<BankAccount>();
-        private object dataService;
 
         public OnlineBankingInMemoryData()
         {
@@ -35,6 +34,7 @@ namespace OnlineBankingDataService
             {
                 existingAccount.Pincode = account.Pincode;
                 existingAccount.balance = account.balance;
+                existingAccount.Transactions = account.Transactions;
             }
         }
 
