@@ -11,6 +11,8 @@ namespace OnlineBankingDataService
     {
         public BankAccount? GetAccNum(int accountNumber);
         public void Add(BankAccount account);
+        public int GenerateNewAccountNumber(BankAccount account);
         public void Update(BankAccount account);
+        int GenerateNewAccountNumber();
     }
 }

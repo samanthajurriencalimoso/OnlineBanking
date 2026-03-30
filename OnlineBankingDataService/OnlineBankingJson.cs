@@ -82,5 +82,15 @@ namespace OnlineBankingDataService
                 SaveDataToJsonFile();
             }
         }
+
+        public int GenerateNewAccountNumber(BankAccount account)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int GenerateNewAccountNumber()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

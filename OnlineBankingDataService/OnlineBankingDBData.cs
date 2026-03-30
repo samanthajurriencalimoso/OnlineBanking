@@ -24,7 +24,7 @@ namespace OnlineBankingDataService
 
             if (existing.Count == 0)
             {
-                BankAccount acc1 = new BankAccount { AccountNumber = 0, Pincode = 1111, balance = 0 };
+                BankAccount acc1 = new BankAccount { AccountNumber = 0000, Pincode = 1111, balance = 0 };
                 BankAccount acc2 = new BankAccount { AccountNumber = 1001, Pincode = 1111, balance = 0 };
                 BankAccount acc3 = new BankAccount { AccountNumber = 1002, Pincode = 2222, balance = 0 };
 
@@ -32,6 +32,17 @@ namespace OnlineBankingDataService
                 Add(acc2);
                 Add(acc3);
             }
+        }
+
+        public int GenerateNewAccountNumber()
+        {
+            string query = "SELECT MAX(AccountNumber) FROM BankAccounts";
+            SqlCommand cmd = new SqlCommand(query, sqlConnection);
+            sqlConnection.Open();
+            object result = cmd.ExecuteScalar();
+            sqlConnection.Close();
+            int maxAccountNumber = (result != DBNull.Value) ? Convert.ToInt32(result) : 0;
+            return maxAccountNumber + 1;
         }
 
         public void Add(BankAccount account)
@@ -101,12 +112,24 @@ namespace OnlineBankingDataService
             return account;
         }
 
+        public int GenerateNewAccountNumber(BankAccount account)
+        {
+            string query = "SELECT ISNULL(MAX(AccountNumber), 999) FROM BankAccounts";
+            SqlCommand command = new SqlCommand(query, sqlConnection);
+
+            sqlConnection.Open();
+            int maxAccNo = (int)command.ExecuteScalar();
+            sqlConnection.Close();
+
+            return maxAccNo + 1;
+        }
+
         public void Update(BankAccount account)
         {
             string updateStmt = @"UPDATE BankAccounts 
-                         SET Pincode = @Pincode,
-                             Balance = @Balance
-                         WHERE AccountNumber = @AccountNumber";
+                                SET Pincode = @Pincode,
+                                Balance = @Balance
+                                WHERE AccountNumber = @AccountNumber";
 
             SqlCommand cmd = new SqlCommand(updateStmt, sqlConnection);
 

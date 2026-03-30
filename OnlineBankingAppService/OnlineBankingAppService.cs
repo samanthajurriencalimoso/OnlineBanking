@@ -16,6 +16,36 @@ namespace OnlineBankingAppService
 
         }
 
+        public string CreateAccount(int age, string pin, string securityCode)
+        {
+
+            if (string.IsNullOrWhiteSpace(pin) || pin.Length != 4 || !int.TryParse(pin, out _))
+            {
+                return "PIN MUST BE 4-DIGITS.";
+            }
+            if (pin != securityCode)
+            {
+                return "SECURITY CODE DOES NOT MATCH PIN.";
+            }
+
+            int pinCodeInt = Convert.ToInt32(pin);
+
+            int newAccNo = dataService.GenerateNewAccountNumber();
+            var newAccount = new BankAccount 
+            { 
+                AccountNumber = newAccNo, 
+                Pincode = pinCodeInt,
+                balance = 0 
+            };
+
+            dataService.Add(newAccount);
+
+           return $" YOUR ACCOUNT HAS BEEN REGISTERED SUCCESSFULLY!\n" +
+           $"YOUR ACCOUNT NUMBER IS: {newAccNo}\n" +
+           $"INITIAL BALANCE: PHP {newAccount.balance}\n" +
+           $"PLEASE KEEP YOUR PIN SECURE.";
+        }
+
         public double GetBalance(int accountNumber)
         {
             var account = dataService.GetAccNum(accountNumber);
@@ -81,6 +111,38 @@ namespace OnlineBankingAppService
             return $"Deposit successful. Fee: PHP {Fee}. New balance: PHP {account.balance}";
         }
 
+        public string SendMoney(int SenderAccNo, string ReceiverAccInput, double amount)
+        {
+            int receiverAccNo;
+            if (!int.TryParse(ReceiverAccInput, out receiverAccNo))
+            {
+                return "Invalid Receiver Account Number.";
+            }
+
+            var sender = dataService.GetAccNum(SenderAccNo);
+            var receiver = dataService.GetAccNum(receiverAccNo);
+
+            if (sender == null || receiver == null)
+            {
+                return "Account not found.";
+            }
+
+            if (sender.balance < amount)
+            {
+                return "Insufficient balance.";
+            }
+
+            sender.balance -= amount;
+            receiver.balance += amount;
+
+            dataService.Update(sender);
+            dataService.Update(receiver);
+
+            return $"Transfer successful! \n" +
+                   $"PHP {amount} has been transferred to account number {receiverAccNo}." +
+                   $" New balance: PHP {sender.balance}";
+        }
+
         public string Withdraw(int accountNumber, string SectionInput, string BankInput, double amount) // CASH-IN
         {
             var account = dataService.GetAccNum(accountNumber);
@@ -98,6 +160,10 @@ namespace OnlineBankingAppService
 
             switch (SectionInput)
             {
+                case "SM":
+                    return SendMoney(accountNumber, BankInput, amount);
+                    break;
+
                 case "BT":
                     switch (BankInput)
                     {
