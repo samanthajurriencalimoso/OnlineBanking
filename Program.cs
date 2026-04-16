@@ -3,6 +3,8 @@ using OnlineBankingDataModel;
 using System;
 using System.Globalization;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices; // What thiss?
+using System.Security.Principal;
 
 namespace OnlineBanking_Act1
 {
@@ -15,7 +17,9 @@ namespace OnlineBanking_Act1
             MainMenu();
         }
 
-            static void MainMenu()
+        static void MainMenu()
+        {
+            while (true)
             {
                 Console.Write("-------------------------\n");
                 Console.Write("1. CREATE ACCOUNT \n" +
@@ -23,7 +27,13 @@ namespace OnlineBanking_Act1
                               "3. EXIT \n");
                 Console.Write("-------------------------\n");
                 Console.Write("PLEASE SELECT AN OPTION: ");
-                int MenuInput = Convert.ToInt32(Console.ReadLine());
+                int MenuInput;
+
+                if (!int.TryParse(Console.ReadLine(), out MenuInput))
+                {
+                    Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
+                    continue;
+                }
 
                 switch (MenuInput)
                 {
@@ -35,17 +45,21 @@ namespace OnlineBanking_Act1
                         break;
                     case 3:
                         Console.WriteLine("THANK YOU FOR USING ONLINE BANKING!");
-                        Environment.Exit(0);
+                        return;
                         break;
                     default:
                         Console.WriteLine("INVALID OPTION. PLEASE TRY AGAIN.");
-                        Environment.Exit(0);
-                        break;
+                        continue;
                 }
             }
-
+        }
         static void Register()
         {
+            /*
+             * Register Requirements:
+             * User must be over 18, Enter 4 digit pin, Confirm 4 digit pin (Security code)
+             */
+
             bool success = false;
 
             do
@@ -54,90 +68,109 @@ namespace OnlineBanking_Act1
                 Console.Write("ACCOUNT REGISTRATION\n" +
                               "AGE VALIDATION: \n" +
                               "ENTER YOUR AGE: ");
-                int age = Convert.ToInt32(Console.ReadLine());
+                int age;
 
-                if (age < 18)
+                //Age Validation
+                if (!int.TryParse(Console.ReadLine(), out age))
                 {
-                    Console.Write("SORRY, YOU MUST BE AT LEAST 18 YEARS OLD TO CREATE AN ACCOUNT.");
-                    return;
-                }
-                else
-                {
-
-                    Console.Write("ENTER A 4-DIGIT PIN: ");
-                    string pinCode = Console.ReadLine();
-
-                    if (pinCode.Length != 4 || !int.TryParse(pinCode, out int pinInt))
-                    {
-                        Console.WriteLine("INVALID PIN. PLEASE ENTER A 4-DIGIT PIN.");
-                        return;
-                    }
-                    else
-                    {
-
-                        Console.Write("CONFIRM YOUR 4-DIGIT PIN: ");
-                        string securityCode = Console.ReadLine();
-
-                        if (securityCode.Length != 4 || !int.TryParse(securityCode, out int ConfirmPin))
-                        {
-                            Console.WriteLine("INVALID CONFIRMATION PIN.");
-                            return;
-                        }
-                        else if (pinInt != ConfirmPin)
-                        {
-                            Console.WriteLine("SECURITY CODE DOES NOT MATCH THE PIN.");
-                        }
-                        else
-                        {
-
-                            string result = appService.CreateAccount(age, pinInt, ConfirmPin);
-                            Console.WriteLine(result);
-
-                            if (result.Contains("REGISTERED SUCCESSFULLY."))
-                            {
-                                success = true;
-                                LOGIN();
-                            }
-                        }
-                    }
+                    Console.Write("INVALID AGE INPUT.");
+                    continue;
                 }
 
-                if (!success)
+                if (age < 18 || age > 116)
                 {
+                    Console.WriteLine(age < 18
+                        ? "SORRY, YOU MUST BE AT LEAST 18 YEARS OLD TO CREATE AN ACCOUNT."
+                        : "SORRY, YOU MUST ENTER A VALID AGE.");
                     Console.WriteLine("-------------------------");
+                    Console.WriteLine("REGISTRATION FAILED");
                     Console.Write("DO YOU WANT TO REGISTER AGAIN? [Y|N]: ");
                     string retry = Console.ReadLine().ToUpper();
-
-                    if (retry == "Y")
+                
+                    if (retry != "Y")
                     {
                         success = true;
-                    }
-                    else
-                    {
-                        Console.Write("-------------------------\n");
+                        Console.WriteLine("-------------------------\n");
                         Console.WriteLine("RETURNING TO THE MAIN MENU...");
                         MainMenu();
                         return;
                     }
+                    else if (retry == "Y")
+                    {
+                        continue;
+                    }
                 }
 
-                } while (!success);
+                //Enter 4-Digit Pin
+                    Console.Write("ENTER A 4-DIGIT PIN: ");
+                    string pinCode = Console.ReadLine();
 
-            Console.Write("-------------------------\n");
-            Console.Write("YOU MAY NOW LOG IN TO START THE TRANSACTIONS.");
-            LOGIN();
+                    if (string.IsNullOrWhiteSpace(pinCode) || pinCode.Length != 4 || !int.TryParse(pinCode, out int pinInt))
+                    {
+                        Console.WriteLine("INVALID PIN. PLEASE ENTER A 4-DIGIT PIN.");
+                        continue;
+                    }
+
+                //Confirm 4-Digit Pin (Security Code)
+                        Console.Write("CONFIRM YOUR 4-DIGIT PIN: ");
+                        string securityCode = Console.ReadLine();
+
+                        if (string.IsNullOrWhiteSpace(securityCode) || securityCode.Length != 4 || !int.TryParse(securityCode, out int ConfirmPin))
+                        {
+                            Console.WriteLine("INVALID CONFIRMATION PIN.");
+                            continue;
+                        }
+
+                        if (pinInt != ConfirmPin)
+                        {
+                            Console.WriteLine("SECURITY CODE DOES NOT MATCH THE PIN.");
+                            continue;
+                        }
+
+                            BankAccount newAccount = appService.CreateAccount(age, pinInt, ConfirmPin);
+
+                        //Display new account information
+                        if (newAccount != null)
+                        {
+                            success = true;
+                            Console.WriteLine("-------------------------------------");
+                            Console.WriteLine("YOUR ACCOUNT HAS BEEN REGISTERED SUCCESSFULLY!");
+                            Console.WriteLine($"YOUR ACCOUNT NUMBER IS: {newAccount.AccountNumber}");
+                            Console.WriteLine($"INITIAL BALANCE: PHP {newAccount.balance}");
+                            Console.WriteLine("PLEASE KEEP YOUR PIN SECURE.");
+
+                            Console.WriteLine("-------------------------------------");
+                            Console.WriteLine("YOU MAY NOW LOG IN TO START THE TRANSACTIONS.");
+                            LOGIN();
+                            return;
+                            }
+                        } while (!success);
         }
 
         static void LOGIN()
         {
             bool isContinue = true;
 
-            Console.WriteLine("-------------------------");
-            Console.Write("ENTER ACCOUNT NUMBER: ");
-            int UserAccountNum = Convert.ToInt32(Console.ReadLine());
-
             do
             {
+                Console.WriteLine("-------------------------");
+                Console.Write("ENTER ACCOUNT NUMBER: ");
+                int UserAccountNum;
+
+                if(!int.TryParse(Console.ReadLine(), out UserAccountNum))
+                {
+                    Console.WriteLine("YOU MAY HAVE TYPED YOUR ACCOUNT NUMBER WRONG. PLEASE TRY AGAIN.");
+                    continue;
+                }
+
+                //Account Validation
+                var acc = appService.GetAccNum(UserAccountNum);
+
+                if(acc == null)
+                {
+                    Console.WriteLine("THE ACCOUNT NUMBER YOU HAVE ENTERED DOES NOT EXIST IN OUR SYSTEM.");
+                    continue;
+                }
 
                 bool authenticated = false;
 
@@ -145,14 +178,23 @@ namespace OnlineBanking_Act1
                 {
                     Console.WriteLine("-------------------------");
                     Console.Write("ENTER 4-DIGIT CODE: ");
-                    int UserPin = Convert.ToInt32(Console.ReadLine());
+                    int UserPin;
+
+                    if (!int.TryParse(Console.ReadLine(), out UserPin))
+                    {
+                        Console.WriteLine("YOU MAY HAVE TYPED YOUR PIN NUMBER WRONG. PLEASE TRY AGAIN.");
+                        continue;
+                    }
 
                     authenticated = appService.Authenticate(UserAccountNum, UserPin);
 
                     if (authenticated)
                     {
-                        Console.WriteLine("\nLogin Successful!");
-                        Choices(UserAccountNum); break;
+                        Console.WriteLine("-------------------------");
+                        Console.WriteLine("-------------------------");
+                        Console.WriteLine("Login Successful!");
+                        Choices(UserAccountNum); 
+                        return;
                     }
                     else
                     {
@@ -170,7 +212,7 @@ namespace OnlineBanking_Act1
                 }
                 else if (continueInput.ToUpper() == "N")
                 {
-                    Console.WriteLine(appService.PrintReceipt(UserAccountNum));
+                    Console.WriteLine("RETURNING TO MAIN MENU...");
                     Environment.Exit(0);
                 }
                 else
@@ -182,153 +224,399 @@ namespace OnlineBanking_Act1
         }
         static void Choices(int accountNumber)
         {
+            bool stayLoggedIn = true;
+
+            while (stayLoggedIn)
+            { 
             Console.WriteLine("-------------------------");
             Console.WriteLine("Welcome! What do you want to do today? \n" +
-                          "1. BALANCE \n" +
-                          "2. DEPOSIT \n" +
-                          "3. WITHDRAW \n" +
-                          "4. EXIT \n" +
-                          "OTHER OPTIONS ON THE WAY!");
+                              "1. BALANCE \n" +
+                              "2. DEPOSIT \n" +
+                              "3. WITHDRAW \n" +
+                              "4. EXIT \n" +
+                              "OTHER OPTIONS ON THE WAY!");
 
             Console.Write("PLEASE SELECT AN OPTION: ");
-            int MenuInput = Convert.ToInt32(Console.ReadLine());
+            int MenuInput;
 
-            switch (MenuInput)
+            if (!int.TryParse(Console.ReadLine(), out MenuInput))
             {
-                case 1: //RETRIEVE
-                    Console.WriteLine("-------------------------");
-                    Console.WriteLine("Your Balance is: PHP " + appService.GetBalance(accountNumber));
-                    break;
-                case 2: // CASH-IN
-                    Console.Write("-------------------------");
-                    Console.Write("\n DEPOSIT CHOICES: \n" +
-                                  "1. BANK CASH-IN [BCI]\n" +
-                                  "2. OVER-THE-COUNTER CASH-IN [OTC]\n" +
-                                  "PLEASE SELECT AN OPTION [BCI|OTC]: ");
-                    string SectionInput = Console.ReadLine().ToUpper();
+                Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
+                continue;
+            }
 
-                    string BankInput = "";
+                switch (MenuInput)
+                {
+                    case 1: //RETRIEVE
+                        Console.WriteLine("-------------------------");
+                        Console.WriteLine("Your Balance is: PHP " + appService.GetBalance(accountNumber));
+                        break;
+                    case 2: // CASH-IN
+                        Console.WriteLine("-------------------------");
+                        Console.Write("DEPOSIT CHOICES: \n" +
+                                      "1. BANK CASH-IN\n" +
+                                      "2. OVER-THE-COUNTER CASH-IN\n" +
+                                      "3. PARTNER OUTLET CASH-IN\n" +
+                                      "PLEASE SELECT AN OPTION: ");
+                        int SectionInput;
 
-                    switch (SectionInput)
-                    {
-                        case "BCI":
-                            Console.WriteLine("-------------------------");
-                            Console.Write("\nBANK CASH-IN OPTIONS: \n" +
+                        if (!int.TryParse(Console.ReadLine(), out SectionInput))
+                        {
+                            Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
+                            continue;
+                        }
+
+                        int BankInput = 0;
+                        string BankOption = string.Empty;
+
+                        switch (SectionInput)
+                        {
+                            case 1:
+                                Console.WriteLine("-------------------------");
+                                Console.Write("BANK CASH-IN OPTIONS: \n" +
+                                                  "1. BPI \n" +
+                                                  "2. BDO \n" +
+                                                  "3. LANDBANK \n" +
+                                                  "ENTER BANK CASH-IN BANK: ");
+                                if (!int.TryParse(Console.ReadLine(), out BankInput))
+                                {
+                                    Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
+                                    continue;
+                                }
+
+                                switch (BankInput)
+                                {
+                                    case 1: 
+                                        BankOption = "BPI";
+                                        break;
+                                    case 2:
+                                        BankOption = "BDO";
+                                        break;
+                                    case 3:
+                                        BankOption = "LANDBANK";
+                                        break;
+                                    default:
+                                        Console.WriteLine("INVALID BANK CASH-IN OPTION.");
+                                        continue;
+                                }
+
+                                break;
+                            case 2:
+                                Console.WriteLine("-------------------------");
+                                Console.Write("BANK OVER-THE-COUNTER OPTIONS: \n" +
+                                                  "1. ROBINSONS \n" +
+                                                  "2. HANDYMAN \n" +
+                                                  "3. 7-ELEVEN \n" +
+                                                  "ENTER OVER-THE-COUNTER CASH-IN BANK: ");
+                                if (!int.TryParse(Console.ReadLine(), out BankInput))
+                                {
+                                    Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
+                                    continue;
+                                }
+
+                                switch (BankInput)
+                                {
+                                    case 1:
+                                        BankOption = "ROBINSONS";
+                                        break;
+                                    case 2:
+                                        BankOption = "HANDYMAN";
+                                        break;
+                                    case 3:
+                                        BankOption = "7-ELEVEN";
+                                        break;
+                                    default:
+                                        Console.WriteLine("INVALID OVER-THE-COUNTER OPTION.");
+                                        continue;
+                                }
+
+                                break;
+                            case 3:
+                                Console.WriteLine("-------------------------");
+                                Console.Write("PARTNER OUTLET OPTIONS: \n" +
+                                                  "1. 7-ELEVEN \n" +
+                                                  "2. SM \n" +
+                                                  "3. PUREGOLD \n" +
+                                                  "ENTER PARTNER OUTLET CASH-OUT: ");
+                                if (!int.TryParse(Console.ReadLine(), out BankInput))
+                                {
+                                    Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
+                                    continue;
+                                }
+
+                                switch (BankInput)
+                                {
+                                    case 1:
+                                        BankOption = "7-ELEVEN";
+                                        break;
+                                    case 2:
+                                        BankOption = "SM";
+                                        break;
+                                    case 3:
+                                        BankOption = "PUREGOLD";
+                                        break;
+                                    default:
+                                        Console.WriteLine("INVALID PARTNER OUTLET OPTION.");
+                                        continue;
+                                }
+
+                                break;
+                            default:
+                                Console.WriteLine("INVALID DEPOSIT OPTION.");
+                                continue;
+                        }
+
+                        Console.WriteLine("-------------------------");
+                        Console.Write("ENTER THE AMOUNT TO DEPOSIT: PHP ");
+                        double amount;
+
+                        if (!double.TryParse(Console.ReadLine(), out amount))
+                        {
+                            Console.WriteLine("INVALID AMOUNT. PLEASE ENTER A NUMBER.");
+                            break;
+                        }
+
+                        double currentBalance = appService.GetBalance(accountNumber);
+
+                        if (amount < 100)
+                        {
+                            Console.WriteLine("MINIMUM DEPOSIT AMOUNT IS PHP 100. PLEASE ENTER A VALID AMOUNT.");
+                            continue;
+                        }
+
+                        if (amount > 100000)
+                        {
+                            Console.WriteLine("MAXIMUM DEPOSIT AMOUNT IS PHP 100,000. PLEASE ENTER A VALID AMOUNT.");
+                            continue;
+                        }
+
+                        if (currentBalance + amount > 1000000)
+                        {
+                            Console.WriteLine("DEPOSIT FAILED. YOUR ACCOUNT BALANCE CANNOT EXCEED PHP 1,000,000.");
+                            continue;
+                        }
+
+                        var result = appService.Deposit(accountNumber, SectionInput, BankInput, BankOption, amount);
+
+                        if (result.success)
+                        {
+                            Console.WriteLine($"Fee: {result.fee}");
+                            Console.WriteLine($"Balance: {result.newBalance}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("DEPOSIT FAILED. PLEASE CHECK INPUTS.");
+                        }
+                        break;
+
+                    case 3: // CASH-OUT
+                        Console.WriteLine("-------------------------");
+                        Console.Write("WITHDRAW / TRANSFER CHOICES: \n" +
+                                      "1. SEND MONEY (INTERNAL TRANSFER)\n" +
+                                      "2. BANK TRANSFER\n" +
+                                      "3. OVER-THE-COUNTER CASH-OUT\n" +
+                                      "4. PARTNER OUTLET CASH-OUT\n" +
+                                      "PLEASE SELECT AN OPTION: ");
+                        int SectionInput2;
+
+                        if (!int.TryParse(Console.ReadLine(), out SectionInput2))
+                        {
+                            Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
+                            continue;
+                        }
+
+                        int BankInput2 = 0;
+                        string BankOption2 = string.Empty;
+
+                        switch (SectionInput2)
+                        {
+                            case 1:
+                                Console.WriteLine("-------------------------");
+                                Console.Write("SEND MONEY (INTERNAL TRANSFER) \n");
+                                Console.Write("ENTER RECEIVER ACCOUNT NUMBER [EX. 1000]: ");
+
+                                if (!int.TryParse(Console.ReadLine(), out BankInput2))
+                                {
+                                    Console.WriteLine("INVALID AMOUNT. PLEASE ENTER A NUMBER.");
+                                }
+
+                                BankOption2 = "SEND MONEY";
+                                break;
+
+                            case 2:
+                                Console.WriteLine("-------------------------");
+                                Console.Write("BANK TRANSFER OPTIONS: \n" +
                                               "1. BPI \n" +
                                               "2. BDO \n" +
                                               "3. LANDBANK \n" +
-                                              "ENTER BANK CASH-IN [BCI] BANK: ");
-                            BankInput = Console.ReadLine().ToUpper();
-                            break;
-                        case "OTC":
-                            Console.WriteLine("-------------------------");
-                            Console.Write("\nBANK OVER-THE-COUNTER OPTIONS: \n" +
-                                              "1. ROBINSONS \n" +
-                                              "2. HANDYMAN \n" +
-                                              "3. 7-ELEVEN \n" +
-                                              "ENTER OVER-THE-COUNTER CASH-IN [OTC] BANK: ");
-                            BankInput = Console.ReadLine().ToUpper();
-                            break;
-                        case "PO":
-                            Console.WriteLine("-------------------------");
-                            Console.Write("\nPARTNER OUTLET OPTIONS: \n" +
+                                              "ENTER BANK TRANSFER [BT]: ");
+                                if (!int.TryParse(Console.ReadLine(), out BankInput2))
+                                {
+                                    Console.WriteLine("INVALID AMOUNT. PLEASE ENTER A NUMBER.");
+                                }
+
+                                switch (BankInput2)
+                                {
+                                    case 1:
+                                        BankOption2 = "BPI";
+                                        break;
+                                    case 2:
+                                        BankOption2 = "BDO";
+                                        break;
+                                    case 3:
+                                        BankOption2 = "LANDBANK";
+                                        break;
+                                    default:
+                                        Console.WriteLine("INVALID BANK TRANSFER OPTION.");
+                                        continue;
+                                }
+                                break;
+                            case 3:
+                                Console.WriteLine("-------------------------");
+                                Console.Write("OVER-THE-COUNTER CASH-OUT OPTIONS: \n" +
+                                              "1. PALAWAN \n" +
+                                              "2. CEBUANA \n" +
+                                              "3. VILLARICA \n" +
+                                              "ENTER OVER-THE-COUNTER CASH-OUT: ");
+                                if (!int.TryParse(Console.ReadLine(), out BankInput2))
+                                {
+                                    Console.WriteLine("INVALID AMOUNT. PLEASE ENTER A NUMBER.");
+                                }
+
+                                switch (BankInput2)
+                                {
+                                    case 1:
+                                        BankOption2 = "PALAWAN";
+                                        break;
+                                    case 2:
+                                        BankOption2 = "CEBUANA";
+                                        break;
+                                    case 3:
+                                        BankOption2 = "VILLARICA";
+                                        break;
+                                    default:
+                                        Console.WriteLine("INVALID OVER-THE-COUNTER OPTION.");
+                                        continue;
+                                }
+                                break;
+                            case 4:
+                                Console.WriteLine("-------------------------");
+                                Console.Write("PARTNER OUTLET CASH-OUT OPTIONS: \n" +
                                               "1. 7-ELEVEN \n" +
                                               "2. SM \n" +
                                               "3. PUREGOLD \n" +
                                               "ENTER PARTNER OUTLET CASH-OUT: ");
-                            BankInput = Console.ReadLine().ToUpper();
-                            break;
+                                if (!int.TryParse(Console.ReadLine(), out BankInput2))
+                                {
+                                    Console.WriteLine("INVALID AMOUNT. PLEASE ENTER A NUMBER.");
+                                }
 
-                        default:
-                            Console.WriteLine("Invalid deposit option.");
+                                switch(BankInput2)
+                                {
+                                    case 1:
+                                        BankOption2 = "7-ELEVEN";
+                                        break;
+                                    case 2:
+                                        BankOption2 = "SM";
+                                        break;
+                                    case 3:
+                                        BankOption2 = "PUREGOLD";
+                                        break;
+                                    default:
+                                        Console.WriteLine("INVALID PARTNER OUTLET OPTION.");
+                                        continue;
+                                    }
+                                    break;
+                            default:
+                                Console.WriteLine("INVALID WITHDRAW OPTION.");
+                                return;
+                        }
+
+                        Console.WriteLine("-------------------------");
+                        Console.Write("ENTER THE AMOUNT TO WITHDRAW: PHP ");
+                        double Wamount;
+
+                        if (!double.TryParse(Console.ReadLine(), out Wamount))
+                        {
+                            Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
                             return;
-                    }
+                        }
 
-                    Console.WriteLine("-------------------------");
-                    Console.Write("ENTER THE AMOUNT TO DEPOSIT: PHP ");
-                    double amount = Convert.ToDouble(Console.ReadLine());
+                        double currentBalance2 = appService.GetBalance(accountNumber);
 
-                    string result = appService.Deposit(accountNumber, SectionInput, BankInput, amount);
-                    Console.WriteLine(result);
-                    break;
+                        if (Wamount < 100)
+                        {
+                            Console.WriteLine("MINIMUM WITHDRAWAL AMOUNT IS PHP 100. PLEASE ENTER A VALID AMOUNT.");
+                            continue;
+                        }
 
-                case 3: // CASH-OUT
-                    Console.WriteLine("-------------------------");
-                    Console.Write("\n WITHDRAW CHOICES: \n" +
-                                  "1. SEND MONEY [SM] \n" +
-                                  "2. BANK TRANSFER [BT]\n" +
-                                  "3. OVER-THE-COUNTER CASH-OUT [OTC]\n" +
-                                  "4. PARTNER OUTLET CASH-OUT [PO]\n" +
-                                  "PLEASE SELECT AN OPTION [SM|BT|OTC|PO]: ");
-                    string SectionInput2 = Console.ReadLine().ToUpper();
+                        if (Wamount > 100000)
+                        {
+                            Console.WriteLine("MAXIMUM WITHDRAWAL AMOUNT IS PHP 100,000. PLEASE ENTER A VALID AMOUNT.");
+                            continue;
+                        }
 
-                    string BankInput2 = "";
+                        if(Wamount > currentBalance2)
+                        {
+                            Console.WriteLine("WITHDRAWAL FAILED. INSUFFICIENT FUNDS.");
+                            continue;
+                        }
 
-                    switch (SectionInput2)
-                    {
-                        case "SM":
-                            Console.WriteLine("-------------------------");
-                            Console.Write("\nSEND MONEY (INTERNAL TRANSFER) \n");
-                            Console.Write("ENTER RECEIVER ACCOUNT NUMBER [EX. 1000]: ");
-                            BankInput2 = Console.ReadLine();
-                            break;
+                        if (SectionInput2 == 1)
+                        {
+                            var transferResult = appService.SendMoney(accountNumber, BankInput2, BankOption2, Wamount);
 
-                        case "BT":
-                            Console.Write("-------------------------");
-                            Console.Write("\nBANK TRANSFER OPTIONS: \n" +
-                                          "1. BPI \n" +
-                                          "2. BDO \n" +
-                                          "3. LANDBANK \n" +
-                                          "ENTER BANK TRANSFER [BT]: ");
-                            BankInput2 = Console.ReadLine().ToUpper();
-                            break;
+                            if (transferResult.success)
+                            {
+                                Console.WriteLine("TRANSFER SUCCESSFUL.");
+                                Console.WriteLine($"Balance: {transferResult.newBalance}");
+                            }
+                            else
+                            {
+                                Console.WriteLine("TRANSFER FAILED. PLEASE CHECK INPUTS.");
+                            }
+                        }
 
-                        case "OTC":
-                            Console.WriteLine("-------------------------");
-                            Console.Write("\nOVER-THE-COUNTER CASH-OUT OPTIONS: \n" +
-                                          "1. PALAWAN \n" +
-                                          "2. CEBUANA \n" +
-                                          "3. VILLARICA \n" +
-                                          "ENTER OVER-THE-COUNTER CASH-OUT: ");
-                            BankInput2 = Console.ReadLine().ToUpper();
-                            break;
+                        else
+                        {
+                            var withdrawResult = appService.Withdraw(accountNumber, SectionInput2, BankInput2, BankOption2, Wamount);
 
-                        case "PO":
-                            Console.WriteLine("-------------------------");
-                            Console.Write("\nPARTNER OUTLET CASH-OUT OPTIONS: \n" +
-                                          "1. 7-ELEVEN \n" +
-                                          "2. SM \n" +
-                                          "3. PUREGOLD \n" +
-                                          "ENTER PARTNER OUTLET CASH-OUT: ");
-                            BankInput2 = Console.ReadLine().ToUpper();
-                            break;
+                            if (withdrawResult.success)
+                            {
+                                Console.WriteLine("WITHDRAWAL SUCCESSFUL.");
+                                Console.WriteLine($"Fee: {withdrawResult.fee}");
+                                Console.WriteLine($"Balance: {withdrawResult.newBalance}");
+                            }
+                            else
+                            {
+                                Console.WriteLine("WITHDRAWAL FAILED. PLEASE CHECK INPUTS.");
+                            }
+                        }
+                        break;
 
-                        default:
-                            Console.WriteLine("Invalid withdraw option.");
-                            return;
-                    }
+                    case 4: //EXIT
+                        var receipt = appService.PrintReceipt(accountNumber);
 
-                    Console.WriteLine("-------------------------");
-                    Console.Write("ENTER THE AMOUNT TO WITHDRAW: PHP ");
-                    double Wamount = Convert.ToDouble(Console.ReadLine());
+                        Console.WriteLine("-----------DIGITAL RECEIPT------------");
+                        Console.WriteLine($"ACCOUNT: {receipt.accountNumber}");
+                        Console.WriteLine("TRANSACTIONS:");
 
-                    string withdrawResult = (SectionInput2 == "SM")
-                        ? appService.SendMoney(accountNumber, BankInput2, Wamount)
-                        : appService.Withdraw(accountNumber, SectionInput2, BankInput2, Wamount);
+                        foreach (var t in receipt.transactions)
+                        {
+                            Console.WriteLine($"  - {t}");
+                        }
 
-                    Console.WriteLine(withdrawResult);
-                    break;
+                        Console.WriteLine($"CURRENT BALANCE: PHP {receipt.balance}");
+                        Console.WriteLine($"DATE: {receipt.date:dd-MMM-yyyy}");
+                        Console.WriteLine("-------------------------------------");
+                        stayLoggedIn = false;
+                        Environment.Exit(0);
+                        break;
 
-                case 4: //EXIT
-                    Console.WriteLine(appService.PrintReceipt(accountNumber));
-                    Console.WriteLine("THANK YOU FOR USING ONLINE BANKING!");
-                    Environment.Exit(0);
-                    break;
-
-                default:
-                    Console.WriteLine("INVALID OPTION. PLEASE TRY AGAIN.");
-                    break;
-                
+                    default:
+                        Console.WriteLine("INVALID OPTION. PLEASE TRY AGAIN.");
+                        break;
+                }
             }
         }
     }

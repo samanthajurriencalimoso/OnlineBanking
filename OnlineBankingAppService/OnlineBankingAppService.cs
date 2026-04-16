@@ -10,36 +10,30 @@ namespace OnlineBankingAppService
     {
         BankingDataService dataService = new BankingDataService(new OnlineBankingDBData());
 
+        public BankAccount GetAccNum(int accountNumber)
+        {
+            return dataService.GetAccNum(accountNumber);
+        }
+
         public bool Authenticate(int accountNumber, int pincode)
         {
             var account = dataService.GetAccNum(accountNumber);
             return account != null && account.Pincode == pincode;
-
         }
 
-        public string CreateAccount(int age, int pin, int securityCode)
+        public BankAccount CreateAccount(int age, int pin, int securityCode)
         {
-
-            if (pin != securityCode)
-            {
-                return "SECURITY CODE DOES NOT MATCH THE PIN.";
-            }
-
             int newAccNo = dataService.GenerateNewAccountNumber();
             var newAccount = new BankAccount
             {
                 AccountNumber = newAccNo,
                 Pincode = pin,
-                balance = 0
+                balance = 0,
+                Transactions = new List<string>()
             };
 
             dataService.Add(newAccount);
-
-            return "-------------------------------------\n" +
-                   $"YOUR ACCOUNT HAS BEEN REGISTERED SUCCESSFULLY!\n" +
-                   $"YOUR ACCOUNT NUMBER IS: {newAccNo}\n" +
-                   $"INITIAL BALANCE: PHP {newAccount.balance}\n" +
-                   $"PLEASE KEEP YOUR PIN SECURE.";
+            return newAccount;
         }
 
         public double GetBalance(int accountNumber)
@@ -48,191 +42,178 @@ namespace OnlineBankingAppService
             return account != null ? account.balance : 0.0;
         }
 
-        public string Deposit(int accountNumber, string SectionInput, string BankInput, double amount) // CASH-IN
+        public (bool success, double fee, double newBalance) Deposit(int accountNumber, int SectionInput, int BankInput, string BankOption, double amount) // CASH-IN
         {
             var account = dataService.GetAccNum(accountNumber);
-            if (account == null) return "Account not found.";
+            if (account == null || amount <= 0)
+            {
+                return (false, 0.0, 0.0);
+            }
 
             double Fee = 0.0;
 
-            if (amount <= 0) return "Invalid deposit amount.";
-
             switch (SectionInput)
             {
-                case "BCI":
+                case 1:
                     switch (BankInput)
                     {
-                        case "BPI":
-                        case "BDO":
-                        case "LANDBANK":
+                        case 1:
+                        case 2:
+                        case 3:
                             Fee = 15.00;
                             break;
                         default:
-                            return "Invalid bank for Bank Cash-In.";
+                            return (false, 0.0, 0.0);
                     }
                     break;
-                case "OTC":
+                case 2:
                     switch (BankInput)
                     {
-                        case "ROBINSONS":
-                        case "HANDYMAN":
+                        case 1:
+                        case 2:
                             Fee = 15.00;
                             break;
-                        case "7-ELEVEN":
+                        case 3:
                             Fee = 0.02;
                             break;
                         default:
-                            return "Invalid bank/provider for Over-the-counter options.";
+                            return (false, 0.0, 0.0);
                     }
                     break;
-                case "PO":
+                case 3:
                     switch (BankInput)
                     {
-                        case "7-ELEVEN":
+                        case 1:
                             Fee = 0.02;
                             break;
-                        case "SM":
-                        case "PUREGOLD":
+                        case 2:
+                        case 3:
                             Fee = 10.00;
                             break;
                         default:
-                            return "Invalid provider for Pay-Online options.";
+                            return (false, 0.0, 0.0);
                     }
                     break;
                 default:
-                    return "Invalid deposit section.";
+                    return (false, 0.0, 0.0);
             }
 
             account.balance += amount - Fee;
+            account.Transactions.Add($"DEPOSIT PHP {amount} via {BankOption}");
             dataService.Update(account);
-            account.Transactions.Add($"DEPOSIT PHP {amount} via {BankInput}");
 
-            return $"Deposit successful. Fee: PHP {Fee}. New balance: PHP {account.balance}";
+            return (true, Fee, account.balance);
         }
 
-        public string SendMoney(int SenderAccNo, string ReceiverAccInput, double amount)
+        public (bool success, double newBalance) SendMoney(int SenderAccNo, int ReceiverAccInput, string BankOption, double amount)
         {
-            int receiverAccNo;
-            if (!int.TryParse(ReceiverAccInput, out receiverAccNo))
-            {
-                return "Invalid Receiver Account Number.";
-            }
 
             var sender = dataService.GetAccNum(SenderAccNo);
-            var receiver = dataService.GetAccNum(receiverAccNo);
+            var receiver = dataService.GetAccNum(ReceiverAccInput);
 
             if (sender == null || receiver == null)
-            {
-                return "Account not found.";
-            }
+                return (false, 0);
+
+            if (amount <= 0)
+                return (false, 0.0);
 
             if (sender.balance < amount)
-            {
-                return "Insufficient balance.";
-            }
+                return (false, 0.0);
 
             sender.balance -= amount;
             receiver.balance += amount;
 
+            sender.Transactions.Add($"SEND MONEY PHP {amount} TO ACCOUNT {ReceiverAccInput}");
+            receiver.Transactions.Add($"RECEIVED PHP {amount} FROM ACCOUNT {SenderAccNo}");
+
             dataService.Update(sender);
             dataService.Update(receiver);
-            sender.Transactions.Add($"SEND MONEY PHP {amount} TO ACCOUNT {receiverAccNo}");
 
-            return $"Transfer successful! \n" +
-                   $"PHP {amount} has been transferred to account number {receiverAccNo}." +
-                   $" New balance: PHP {sender.balance}";
+            return (true, sender.balance);
         }
 
-        public string Withdraw(int accountNumber, string SectionInput, string BankInput, double amount) // CASH-IN
+        public (bool success, double fee, double newBalance) Withdraw(int accountNumber, int SectionInput, int BankInput, string BankOption2, double amount) // CASH-IN
         {
             var account = dataService.GetAccNum(accountNumber);
             if (account == null)
-            {
-                return "Account not found.";
-            }
+                return (false, 0.0, 0.0);
+
+            if (amount <= 0)
+                return (false, 0.0, 0.0);
 
             double Fee = 0.0;
 
-            if (amount <= 0)
-            {
-                return "Invalid withdrawal amount.";
-            }
-
             switch (SectionInput)
             {
-                case "SM":
-                    return SendMoney(accountNumber, BankInput, amount);
+                case 1: // SEND MONEY
+                    {
+                        var result = SendMoney(accountNumber, BankInput, BankOption2, amount);
+                        return (result.success, 0.0, result.newBalance);
+                    }
                     break;
 
-                case "BT":
+                case 2: // BANK TRANSFER
                     switch (BankInput)
                     {
-                        case "BPI":
-                        case "BDO":
-                        case "LANDBANK":
+                        case 1:
+                        case 2:
+                        case 3:
                             Fee = 20.00;
                             break;
                         default:
-                            return "Invalid bank for BT.";
+                            return (false, 0, 0);
                     }
                     break;
 
-                case "OTC":
+                case 3: // OVER-THE-COUNTER
                     switch (BankInput)
                     {
-                        case "PALAWAN":
-                        case "CEBUANA":
-                        case "VILLARICA":
+                        case 1:
+                        case 2:
+                        case 3:
                             Fee = 15.00;
                             break;
                         default:
-                            return "Invalid provider for OTC.";
+                            return (false, 0.0, 0.0);
                     }
                     break;
-                case "PO":
+                case 4: // PARTNER OUTLET
                     switch (BankInput)
                     {
-                        case "7-ELEVEN":
+                        case 1:
                             Fee = 0.02;
                             break;
-                        case "SM":
-                        case "PUREGOLD":
+                        case 2:
+                        case 3:
                             Fee = 10.00;
                             break;
                         default:
-                            return "Invalid provider for PO.";
+                            return (false, 0.0, 0.0);
                     }
                     break;
 
                 default:
-                    return "Invalid withdrawal section.";
+                    return (false, 0.0, 0.0);
             }
             if (account.balance < amount + Fee)
-                return "Insufficient balance.";
+                return (false, 0.0, 0.0);
 
             account.balance -= amount + Fee;
-            dataService.Update(account);
-            account.Transactions.Add($"WITHDRAW PHP {amount} via {BankInput}");
+            account.Transactions.Add($"WITHDRAW PHP {amount} via {BankOption2}");
 
-            return $"Withdrawal successful. Fee: PHP {Fee}. New balance: PHP {account.balance}";
+            dataService.Update(account);
+
+            return (true, Fee, account.balance);
         }
 
-        public string PrintReceipt(int accountNumber)
+        public (int accountNumber, List<string> transactions, double balance, DateTime date) PrintReceipt(int accountNumber)
         {
             var account = dataService.GetAccNum(accountNumber);
 
-            var receipt = "\n-----------DIGITAL RECEIPT------------\n" +
-                         $"ACCOUNT: {account.AccountNumber}\n" +
-                          "TRANSACTIONS: \n";
-            foreach (var transaction in account.Transactions)
-            {
-                receipt += $"  -  {transaction} \n";
-            }
+            if (account == null)
+                return (0, new List<string>(), 0.0, DateTime.Now);
 
-            receipt +=  $"CURRENT BALANCE: PHP {account.balance}\n" +
-                        $"DATE: {DateTime.Now: dd-MMM-yyyy}\n" +
-                        "-------------------------------------";
-            return receipt;
+            return (account.AccountNumber, account.Transactions, account.balance, DateTime.Now);
         }
     }
 }

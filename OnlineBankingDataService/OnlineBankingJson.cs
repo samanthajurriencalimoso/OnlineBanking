@@ -28,9 +28,9 @@ namespace OnlineBankingDataService
 
             if (accounts.Count <= 0)
             {
-                BankAccount AccNum1 = new BankAccount { AccountNumber = 0000, Pincode = 1111, balance = 0.0 };
-                BankAccount AccNum2 = new BankAccount { AccountNumber = 1001, Pincode = 1111, balance = 0.0 };
-                BankAccount AccNum3 = new BankAccount { AccountNumber = 1002, Pincode = 2222, balance = 0.0 };
+                BankAccount AccNum1 = new BankAccount { AccountNumber = 0000, Pincode = 1111, balance = 0.0, Transactions = new List<string>() };
+                BankAccount AccNum2 = new BankAccount { AccountNumber = 1001, Pincode = 1111, balance = 0.0, Transactions = new List<string>() };
+                BankAccount AccNum3 = new BankAccount { AccountNumber = 1002, Pincode = 2222, balance = 0.0, Transactions = new List<string>() };
 
                 accounts.Add(AccNum1);
                 accounts.Add(AccNum2);
@@ -79,6 +79,7 @@ namespace OnlineBankingDataService
             {
                 existingAccount.Pincode = account.Pincode;
                 existingAccount.balance = account.balance;
+                existingAccount.Transactions = account.Transactions;
                 SaveDataToJsonFile();
             }
         }

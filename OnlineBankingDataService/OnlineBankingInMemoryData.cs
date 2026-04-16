@@ -8,9 +8,9 @@ namespace OnlineBankingDataService
 
         public OnlineBankingInMemoryData()
         {
-            BankAccount AccNum1 = new BankAccount { AccountNumber = 0000, Pincode = 1111, balance = 0.0 };
-            BankAccount AccNum2 = new BankAccount { AccountNumber = 1001, Pincode = 1111, balance = 0.0 };
-            BankAccount AccNum3 = new BankAccount { AccountNumber = 1002, Pincode = 2222, balance = 0.0 };
+            BankAccount AccNum1 = new BankAccount { AccountNumber = 0000, Pincode = 1111, balance = 0.0, Transactions = new List<string>() };
+            BankAccount AccNum2 = new BankAccount { AccountNumber = 1001, Pincode = 1111, balance = 0.0, Transactions = new List<string>() };
+            BankAccount AccNum3 = new BankAccount { AccountNumber = 1002, Pincode = 2222, balance = 0.0, Transactions = new List<string>() };
 
             Accounts.Add(AccNum1);
             Accounts.Add(AccNum2);

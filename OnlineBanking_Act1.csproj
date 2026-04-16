@@ -20,6 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Services.Client" Version="20.256.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="OnlineBankingAppService\OnlineBankingAppService.csproj" />
     <ProjectReference Include="OnlineBankingDataModel\OnlineBankingDataModel.csproj" />
   </ItemGroup>
