@@ -449,7 +449,7 @@ namespace OnlineBanking_Act1
                                               "1. BPI \n" +
                                               "2. BDO \n" +
                                               "3. LANDBANK \n" +
-                                              "ENTER BANK TRANSFER [BT]: ");
+                                              "ENTER BANK TRANSFER: ");
                                 if (!int.TryParse(Console.ReadLine(), out BankInput2))
                                 {
                                     Console.WriteLine("INVALID AMOUNT. PLEASE ENTER A NUMBER.");
