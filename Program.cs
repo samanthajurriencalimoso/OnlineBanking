@@ -3,7 +3,7 @@ using OnlineBankingDataModel;
 using System;
 using System.Globalization;
 using System.Net.NetworkInformation;
-using System.Runtime.InteropServices; // What thiss?
+using System.Runtime.InteropServices;
 using System.Security.Principal;
 
 namespace OnlineBanking_Act1
