@@ -24,5 +24,30 @@
     "Transactions": [
       "DEPOSIT PHP 500 via BPI"
     ]
+  },
+  {
+    "AccountNumber": 1004,
+    "Pincode": 1234,
+    "balance": 0,
+    "Transactions": []
+  },
+  {
+    "AccountNumber": 1005,
+    "Pincode": 1234,
+    "balance": 5970,
+    "Transactions": [
+      "DEPOSIT PHP 5000 via HANDYMAN",
+      "WITHDRAW PHP 2000 via VILLARICA",
+      "RECEIVED PHP 3000 FROM ACCOUNT 1006"
+    ]
+  },
+  {
+    "AccountNumber": 1006,
+    "Pincode": 1245,
+    "balance": 1985,
+    "Transactions": [
+      "DEPOSIT PHP 5000 via HANDYMAN",
+      "SEND MONEY PHP 3000 TO ACCOUNT 1005"
+    ]
   }
 ]

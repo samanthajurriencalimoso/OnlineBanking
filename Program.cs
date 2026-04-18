@@ -21,10 +21,10 @@ namespace OnlineBanking_Act1
         {
             while (true)
             {
-                Console.Write("-------------------------\n");
-                Console.Write("1. CREATE ACCOUNT \n" +
+                Console.WriteLine("-------------------------");
+                Console.WriteLine("1. CREATE ACCOUNT \n" +
                               "2. LOGIN (BALANCE, DEPOSIT, WITHDRAW) \n" +
-                              "3. EXIT \n");
+                              "3. EXIT ");
                 Console.Write("-------------------------\n");
                 Console.Write("PLEASE SELECT AN OPTION: ");
                 int MenuInput;
@@ -64,7 +64,7 @@ namespace OnlineBanking_Act1
 
             do
             {
-                Console.Write("-------------------------\n");
+                Console.WriteLine("-------------------------");
                 Console.Write("ACCOUNT REGISTRATION\n" +
                               "AGE VALIDATION: \n" +
                               "ENTER YOUR AGE: ");
@@ -73,6 +73,7 @@ namespace OnlineBanking_Act1
                 //Age Validation
                 if (!int.TryParse(Console.ReadLine(), out age))
                 {
+                    Console.WriteLine("-------------------------");
                     Console.Write("INVALID AGE INPUT.");
                     continue;
                 }
@@ -90,7 +91,7 @@ namespace OnlineBanking_Act1
                     if (retry != "Y")
                     {
                         success = true;
-                        Console.WriteLine("-------------------------\n");
+                        Console.WriteLine("-------------------------");
                         Console.WriteLine("RETURNING TO THE MAIN MENU...");
                         MainMenu();
                         return;
@@ -107,8 +108,9 @@ namespace OnlineBanking_Act1
 
                     if (string.IsNullOrWhiteSpace(pinCode) || pinCode.Length != 4 || !int.TryParse(pinCode, out int pinInt))
                     {
+                        Console.WriteLine("-------------------------");
                         Console.WriteLine("INVALID PIN. PLEASE ENTER A 4-DIGIT PIN.");
-                        continue;
+                        return;
                     }
 
                 //Confirm 4-Digit Pin (Security Code)
@@ -117,12 +119,14 @@ namespace OnlineBanking_Act1
 
                         if (string.IsNullOrWhiteSpace(securityCode) || securityCode.Length != 4 || !int.TryParse(securityCode, out int ConfirmPin))
                         {
+                            Console.WriteLine("-------------------------");
                             Console.WriteLine("INVALID CONFIRMATION PIN.");
                             continue;
                         }
 
                         if (pinInt != ConfirmPin)
                         {
+                            Console.WriteLine("-------------------------");
                             Console.WriteLine("SECURITY CODE DOES NOT MATCH THE PIN.");
                             continue;
                         }
@@ -156,11 +160,32 @@ namespace OnlineBanking_Act1
                 Console.WriteLine("-------------------------");
                 Console.Write("ENTER ACCOUNT NUMBER: ");
                 int UserAccountNum;
+                
 
-                if(!int.TryParse(Console.ReadLine(), out UserAccountNum))
+                if (!int.TryParse(Console.ReadLine(), out UserAccountNum))
                 {
-                    Console.WriteLine("YOU MAY HAVE TYPED YOUR ACCOUNT NUMBER WRONG. PLEASE TRY AGAIN.");
-                    continue;
+                        Console.WriteLine("-------------------------"); 
+                        Console.WriteLine("YOU MAY HAVE TYPED YOUR ACCOUNT NUMBER WRONG. PLEASE TRY AGAIN.");
+                        Console.WriteLine("-------------------------");
+                        Console.Write("Do you want to continue? [Y/N]: ");
+                        string retry = Console.ReadLine();
+
+                        if (retry.ToUpper() == "Y")
+                        {
+                            continue;
+                        }
+                        else if (retry.ToUpper() == "N")
+                        {
+                            Console.WriteLine("-------------------------");
+                            Console.WriteLine("RETURNING TO MAIN MENU...");
+                        break;
+                        }
+                        else
+                        {
+                            Console.WriteLine("-------------------------");
+                            Console.WriteLine("Invalid input. System will exit.");
+                            Environment.Exit(0);
+                        }
                 }
 
                 //Account Validation
@@ -168,8 +193,9 @@ namespace OnlineBanking_Act1
 
                 if(acc == null)
                 {
+                    Console.WriteLine("-------------------------");
                     Console.WriteLine("THE ACCOUNT NUMBER YOU HAVE ENTERED DOES NOT EXIST IN OUR SYSTEM.");
-                    continue;
+                    break;
                 }
 
                 bool authenticated = false;
@@ -182,6 +208,7 @@ namespace OnlineBanking_Act1
 
                     if (!int.TryParse(Console.ReadLine(), out UserPin))
                     {
+                        Console.WriteLine("-------------------------");
                         Console.WriteLine("YOU MAY HAVE TYPED YOUR PIN NUMBER WRONG. PLEASE TRY AGAIN.");
                         continue;
                     }
@@ -212,12 +239,14 @@ namespace OnlineBanking_Act1
                 }
                 else if (continueInput.ToUpper() == "N")
                 {
-                    Console.WriteLine("RETURNING TO MAIN MENU...");
+                    Console.WriteLine("-------------------------");
+                    Console.Write("RETURNING TO MAIN MENU...");
                     Environment.Exit(0);
                 }
                 else
                 {
-                    Console.WriteLine("Invalid input. System will exit.");
+                    Console.WriteLine("-------------------------");
+                    Console.WriteLine("INVALID INPUT. SYSTEM WILL EXIT.");
                     Environment.Exit(0);
                 }
             } while (isContinue);
@@ -239,11 +268,12 @@ namespace OnlineBanking_Act1
             Console.Write("PLEASE SELECT AN OPTION: ");
             int MenuInput;
 
-            if (!int.TryParse(Console.ReadLine(), out MenuInput))
-            {
-                Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
-                continue;
-            }
+                if (!int.TryParse(Console.ReadLine(), out MenuInput))
+                {
+                    Console.WriteLine("-------------------------");
+                    Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
+                    continue;
+                }
 
                 switch (MenuInput)
                 {
@@ -262,6 +292,7 @@ namespace OnlineBanking_Act1
 
                         if (!int.TryParse(Console.ReadLine(), out SectionInput))
                         {
+                            Console.WriteLine("-------------------------");
                             Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
                             continue;
                         }
@@ -280,6 +311,7 @@ namespace OnlineBanking_Act1
                                                   "ENTER BANK CASH-IN BANK: ");
                                 if (!int.TryParse(Console.ReadLine(), out BankInput))
                                 {
+                                    Console.WriteLine("-------------------------");
                                     Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
                                     continue;
                                 }
@@ -296,6 +328,7 @@ namespace OnlineBanking_Act1
                                         BankOption = "LANDBANK";
                                         break;
                                     default:
+                                        Console.WriteLine("-------------------------");
                                         Console.WriteLine("INVALID BANK CASH-IN OPTION.");
                                         continue;
                                 }
@@ -310,6 +343,7 @@ namespace OnlineBanking_Act1
                                                   "ENTER OVER-THE-COUNTER CASH-IN BANK: ");
                                 if (!int.TryParse(Console.ReadLine(), out BankInput))
                                 {
+                                    Console.WriteLine("-------------------------");
                                     Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
                                     continue;
                                 }
@@ -326,6 +360,7 @@ namespace OnlineBanking_Act1
                                         BankOption = "7-ELEVEN";
                                         break;
                                     default:
+                                        Console.WriteLine("-------------------------");
                                         Console.WriteLine("INVALID OVER-THE-COUNTER OPTION.");
                                         continue;
                                 }
@@ -340,6 +375,7 @@ namespace OnlineBanking_Act1
                                                   "ENTER PARTNER OUTLET CASH-OUT: ");
                                 if (!int.TryParse(Console.ReadLine(), out BankInput))
                                 {
+                                    Console.WriteLine("-------------------------");
                                     Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
                                     continue;
                                 }
@@ -356,12 +392,14 @@ namespace OnlineBanking_Act1
                                         BankOption = "PUREGOLD";
                                         break;
                                     default:
+                                        Console.WriteLine("-------------------------");
                                         Console.WriteLine("INVALID PARTNER OUTLET OPTION.");
                                         continue;
                                 }
 
                                 break;
                             default:
+                                Console.WriteLine("-------------------------");
                                 Console.WriteLine("INVALID DEPOSIT OPTION.");
                                 continue;
                         }
@@ -372,6 +410,7 @@ namespace OnlineBanking_Act1
 
                         if (!double.TryParse(Console.ReadLine(), out amount))
                         {
+                            Console.WriteLine("-------------------------");
                             Console.WriteLine("INVALID AMOUNT. PLEASE ENTER A NUMBER.");
                             break;
                         }
@@ -380,18 +419,21 @@ namespace OnlineBanking_Act1
 
                         if (amount < 100)
                         {
+                            Console.WriteLine("-------------------------");
                             Console.WriteLine("MINIMUM DEPOSIT AMOUNT IS PHP 100. PLEASE ENTER A VALID AMOUNT.");
                             continue;
                         }
 
                         if (amount > 100000)
                         {
+                            Console.WriteLine("-------------------------");
                             Console.WriteLine("MAXIMUM DEPOSIT AMOUNT IS PHP 100,000. PLEASE ENTER A VALID AMOUNT.");
                             continue;
                         }
 
                         if (currentBalance + amount > 1000000)
                         {
+                            Console.WriteLine("-------------------------");
                             Console.WriteLine("DEPOSIT FAILED. YOUR ACCOUNT BALANCE CANNOT EXCEED PHP 1,000,000.");
                             continue;
                         }
@@ -400,16 +442,28 @@ namespace OnlineBanking_Act1
 
                         if (result.success)
                         {
-                            Console.WriteLine($"Fee: {result.fee}");
-                            Console.WriteLine($"Balance: {result.newBalance}");
+                            Console.WriteLine("-------------------------");
+                            Console.WriteLine("DEPOSIT SUCCESSFUL!");
+                            Console.WriteLine($"BANK FEE: {result.fee}");
+                            Console.WriteLine($"UPDATED BALANCE: {result.newBalance}");
                         }
                         else
                         {
+                            Console.WriteLine("-------------------------");
                             Console.WriteLine("DEPOSIT FAILED. PLEASE CHECK INPUTS.");
                         }
                         break;
 
                     case 3: // CASH-OUT
+                        double currentBalance2 = appService.GetBalance(accountNumber);
+
+                        if (currentBalance2 == 0)
+                        {
+                            Console.WriteLine("-------------------------");
+                            Console.WriteLine("WITHDRAWAL FAILED. YOUR ACCOUNT HAS NO FUNDS.");
+                            break;
+                        }
+
                         Console.WriteLine("-------------------------");
                         Console.Write("WITHDRAW / TRANSFER CHOICES: \n" +
                                       "1. SEND MONEY (INTERNAL TRANSFER)\n" +
@@ -421,6 +475,7 @@ namespace OnlineBanking_Act1
 
                         if (!int.TryParse(Console.ReadLine(), out SectionInput2))
                         {
+                            Console.WriteLine("-------------------------");
                             Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
                             continue;
                         }
@@ -437,6 +492,7 @@ namespace OnlineBanking_Act1
 
                                 if (!int.TryParse(Console.ReadLine(), out BankInput2))
                                 {
+                                    Console.WriteLine("-------------------------");
                                     Console.WriteLine("INVALID AMOUNT. PLEASE ENTER A NUMBER.");
                                 }
 
@@ -452,6 +508,7 @@ namespace OnlineBanking_Act1
                                               "ENTER BANK TRANSFER: ");
                                 if (!int.TryParse(Console.ReadLine(), out BankInput2))
                                 {
+                                    Console.WriteLine("-------------------------");
                                     Console.WriteLine("INVALID AMOUNT. PLEASE ENTER A NUMBER.");
                                 }
 
@@ -467,6 +524,7 @@ namespace OnlineBanking_Act1
                                         BankOption2 = "LANDBANK";
                                         break;
                                     default:
+                                        Console.WriteLine("-------------------------");
                                         Console.WriteLine("INVALID BANK TRANSFER OPTION.");
                                         continue;
                                 }
@@ -480,6 +538,7 @@ namespace OnlineBanking_Act1
                                               "ENTER OVER-THE-COUNTER CASH-OUT: ");
                                 if (!int.TryParse(Console.ReadLine(), out BankInput2))
                                 {
+                                    Console.WriteLine("-------------------------");
                                     Console.WriteLine("INVALID AMOUNT. PLEASE ENTER A NUMBER.");
                                 }
 
@@ -495,6 +554,7 @@ namespace OnlineBanking_Act1
                                         BankOption2 = "VILLARICA";
                                         break;
                                     default:
+                                        Console.WriteLine("-------------------------");
                                         Console.WriteLine("INVALID OVER-THE-COUNTER OPTION.");
                                         continue;
                                 }
@@ -508,6 +568,7 @@ namespace OnlineBanking_Act1
                                               "ENTER PARTNER OUTLET CASH-OUT: ");
                                 if (!int.TryParse(Console.ReadLine(), out BankInput2))
                                 {
+                                    Console.WriteLine("-------------------------");
                                     Console.WriteLine("INVALID AMOUNT. PLEASE ENTER A NUMBER.");
                                 }
 
@@ -523,13 +584,15 @@ namespace OnlineBanking_Act1
                                         BankOption2 = "PUREGOLD";
                                         break;
                                     default:
+                                        Console.WriteLine("-------------------------");
                                         Console.WriteLine("INVALID PARTNER OUTLET OPTION.");
                                         continue;
                                     }
                                     break;
                             default:
+                                Console.WriteLine("-------------------------");
                                 Console.WriteLine("INVALID WITHDRAW OPTION.");
-                                return;
+                                continue;
                         }
 
                         Console.WriteLine("-------------------------");
@@ -538,29 +601,25 @@ namespace OnlineBanking_Act1
 
                         if (!double.TryParse(Console.ReadLine(), out Wamount))
                         {
+                            Console.WriteLine("-------------------------");
                             Console.WriteLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
                             return;
                         }
 
-                        double currentBalance2 = appService.GetBalance(accountNumber);
-
                         if (Wamount < 100)
                         {
+                            Console.WriteLine("-------------------------");
                             Console.WriteLine("MINIMUM WITHDRAWAL AMOUNT IS PHP 100. PLEASE ENTER A VALID AMOUNT.");
                             continue;
                         }
 
                         if (Wamount > 100000)
                         {
+                            Console.WriteLine("-------------------------");
                             Console.WriteLine("MAXIMUM WITHDRAWAL AMOUNT IS PHP 100,000. PLEASE ENTER A VALID AMOUNT.");
                             continue;
                         }
 
-                        if(Wamount > currentBalance2)
-                        {
-                            Console.WriteLine("WITHDRAWAL FAILED. INSUFFICIENT FUNDS.");
-                            continue;
-                        }
 
                         if (SectionInput2 == 1)
                         {
@@ -568,11 +627,13 @@ namespace OnlineBanking_Act1
 
                             if (transferResult.success)
                             {
+                                Console.WriteLine("-------------------------");
                                 Console.WriteLine("TRANSFER SUCCESSFUL.");
-                                Console.WriteLine($"Balance: {transferResult.newBalance}");
+                                Console.WriteLine($"BALANCE: {transferResult.newBalance}");
                             }
                             else
                             {
+                                Console.WriteLine("-------------------------");
                                 Console.WriteLine("TRANSFER FAILED. PLEASE CHECK INPUTS.");
                             }
                         }
@@ -583,12 +644,14 @@ namespace OnlineBanking_Act1
 
                             if (withdrawResult.success)
                             {
+                                Console.WriteLine("-------------------------");
                                 Console.WriteLine("WITHDRAWAL SUCCESSFUL.");
-                                Console.WriteLine($"Fee: {withdrawResult.fee}");
-                                Console.WriteLine($"Balance: {withdrawResult.newBalance}");
+                                Console.WriteLine($"BANK FEE: {withdrawResult.fee}");
+                                Console.WriteLine($"UPDATED BALANCE: {withdrawResult.newBalance}");
                             }
                             else
                             {
+                                Console.WriteLine("-------------------------");
                                 Console.WriteLine("WITHDRAWAL FAILED. PLEASE CHECK INPUTS.");
                             }
                         }
@@ -614,6 +677,7 @@ namespace OnlineBanking_Act1
                         break;
 
                     default:
+                        Console.WriteLine("-------------------------");
                         Console.WriteLine("INVALID OPTION. PLEASE TRY AGAIN.");
                         break;
                 }
